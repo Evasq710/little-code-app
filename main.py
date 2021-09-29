@@ -104,6 +104,7 @@ class Interfaz:
             code += "$"
             codigo = ""
             codigo = code
+            tokens_leidos = []
             self.analizador_lexico()
             for token in tokens_leidos:
                 print(token.nombre, str(token.lexema), str(token.fila), str(token.columna))
@@ -140,45 +141,35 @@ class Interfaz:
         estado = "q0"
         lexema_actual = ""
         for caracter in codigo:
-            # Control Filas - columnas
-            if ord(caracter) == 9: # tab
-                columna += 4
-            elif ord(caracter) == 10: # salto de linea
-                columna = 0
-                fila += 1
-            elif ord(caracter) == 32: # espacio
-                columna += 1
-            else: # otro caracter
-                columna +=1
             if estado == "q0":
                 if caracter == '"':
                     estado = "q1"
                 elif caracter == "-":
                     lexema_actual += caracter
-                    estado = "q1.5"
+                    estado = "q2"
                 elif self.is_number(caracter):
                     lexema_actual += caracter
-                    estado = "q2"
+                    estado = "q3"
                 elif self.is_letter(caracter):
                     lexema_actual += caracter
-                    estado = "q3"
+                    estado = "q4"
                 elif caracter == "_":
                     lexema_actual += caracter
-                    estado = "q3"
-                elif caracter == "#":
                     estado = "q4"
-                elif caracter == "'":
+                elif caracter == "#":
                     estado = "q5"
+                elif caracter == "'":
+                    estado = "q6"
                 elif self.is_symbol(caracter):
                     lexema_actual += caracter
-                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 1))
+                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 2))
                     tokens_leidos.append(t_simbolo)
                     lexema_actual = ""
+                elif ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32:
+                    pass
                 elif caracter == "$":
                     #TODO FIN $
                     print("->Fin de análisis de archivo")
-                elif ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32:
-                    pass
                 else:
                     #TODO ERROR LÉXICO
                     pass
@@ -186,26 +177,26 @@ class Interfaz:
                 if self.is_ascii(caracter):
                     lexema_actual += caracter
                 elif caracter == '"':
-                    t_cadena = Token("Cadena", lexema_actual, fila, columna-(len(lexema_actual) + 1))
+                    t_cadena = Token("Cadena", lexema_actual, fila, columna-(len(lexema_actual)))
                     tokens_leidos.append(t_cadena)
                     lexema_actual = ""
-                    estado = "q0"
-                else:
-                    #TODO ERROR LÉXICO
-                    pass
-            elif estado == "q1.5":
-                if self.is_number(caracter):
-                    lexema_actual += caracter
-                    estado = "q2"
+                    estado = "q7"
                 else:
                     #TODO ERROR LÉXICO
                     pass
             elif estado == "q2":
                 if self.is_number(caracter):
                     lexema_actual += caracter
+                    estado = "q3"
+                else:
+                    #TODO ERROR LÉXICO
+                    pass
+            elif estado == "q3":
+                if self.is_number(caracter):
+                    lexema_actual += caracter
                 elif caracter == ".":
                     lexema_actual += caracter
-                    estado = "q6"
+                    estado = "q8"
                 elif ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32:
                     entero = 0
                     entero = int(lexema_actual)
@@ -220,14 +211,14 @@ class Interfaz:
                     tokens_leidos.append(t_entero)
                     lexema_actual = ""
                     lexema_actual += caracter
-                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 1))
+                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 2))
                     tokens_leidos.append(t_simbolo)
                     lexema_actual = ""
                     estado = "q0"
                 else:
                     #TODO ERROR LÉXICO
                     pass
-            elif estado == "q3":
+            elif estado == "q4":
                 if self.is_letter(caracter):
                     lexema_actual += caracter
                 elif caracter == "_":
@@ -263,38 +254,50 @@ class Interfaz:
                         tokens_leidos.append(t_id)
                         lexema_actual = ""
                     lexema_actual += caracter
-                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 1))
+                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 2))
                     tokens_leidos.append(t_simbolo)
                     lexema_actual = ""
                     estado = "q0"
                 else:
                     #TODO ERROR LÉXICO
                     pass
-            elif estado == "q4":
+            elif estado == "q5":
                 if ord(caracter) == 10: # Salto de línea
                     estado = "q0"
                 else:
                     pass
-            elif estado == "q5":
-                if caracter == "'":
-                    estado = "q7"
-                else:
-                    #TODO ERROR LÉXICO
-                    pass
             elif estado == "q6":
-                if self.is_number(caracter):
-                    lexema_actual += caracter
-                    estado = "q8"
-                else:
-                    #TODO ERROR LÉXICO
-                    pass
-            elif estado == "q7":
                 if caracter == "'":
                     estado = "q9"
                 else:
                     #TODO ERROR LÉXICO
                     pass
+            elif estado == "q7":
+                if ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32:
+                    estado = "q0"
+                elif self.is_symbol(caracter):
+                    lexema_actual += caracter
+                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 2))
+                    tokens_leidos.append(t_simbolo)
+                    lexema_actual = ""
+                    estado = "q0"
+                else:
+                    #TODO ERROR LÉXICO
+                    pass
             elif estado == "q8":
+                if self.is_number(caracter):
+                    lexema_actual += caracter
+                    estado = "q10"
+                else:
+                    #TODO ERROR LÉXICO
+                    pass
+            elif estado == "q9":
+                if caracter == "'":
+                    estado = "q11"
+                else:
+                    #TODO ERROR LÉXICO
+                    pass
+            elif estado == "q10":
                 if self.is_number(caracter):
                     lexema_actual += caracter
                 elif ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32:
@@ -311,25 +314,25 @@ class Interfaz:
                     tokens_leidos.append(t_decimal)
                     lexema_actual = ""
                     lexema_actual += caracter
-                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 1))
+                    t_simbolo = Token("Simbolo", lexema_actual, fila, columna-(len(lexema_actual) - 2))
                     tokens_leidos.append(t_simbolo)
                     lexema_actual = ""
                     estado = "q0"
                 else:
                     #TODO ERROR LÉXICO
                     pass
-            elif estado == "q9":
+            elif estado == "q11":
                 if caracter == "'":
-                    estado = "q10"
+                    estado = "q12"
                 else:
                     pass
-            elif estado == "q10":
+            elif estado == "q12":
                 if caracter == "'":
-                    estado = "q11"
+                    estado = "q13"
                 else:
                     #TODO ERROR LÉXICO
                     pass
-            elif estado == "q11":
+            elif estado == "q13":
                 if caracter == "'":
                     estado = "q0"
                 else:
@@ -337,6 +340,16 @@ class Interfaz:
                     pass
             else:
                 print("->ERROR: No se redirigió un estado correctamente. Estado: " + estado)
+            # Control Filas - columnas
+            if ord(caracter) == 9: # tab
+                columna += 4
+            elif ord(caracter) == 10: # salto de linea
+                columna = 0
+                fila += 1
+            elif ord(caracter) == 32: # espacio
+                columna += 1
+            else: # otro caracter
+                columna +=1
 
 if __name__ == "__main__":
     ventana = Tk()
