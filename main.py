@@ -2,8 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 import traceback
 
-texto_cargado = False
 texto_lfp = ""
+codigo = ""
 
 class Interfaz:
     def __init__(self, window):
@@ -17,13 +17,27 @@ class Interfaz:
         imagen = PhotoImage(file = "images/logo.png")
         logo = Label(self.frame, image = imagen, bg="black")
         logo.photo = imagen
-        logo.place(x=100, y=50, width=200, height=100)
+        logo.place(x=100, y=20, width=200, height=100)
 
         title = Label(self.frame, text="Proyecto 2", font=("Ebrima", 60, "bold"), bg="black", fg="white")
-        title.place(x=575, y=50)
+        title.place(x=575, y=20)
+
+        self.txtbox_code = Text(self.frame, font=("Consolas", 14), bg="white")
+        self.txtbox_code.tag_configure("izquierda", justify='left')
+        self.txtbox_code.insert("1.0", "")
+        self.txtbox_code.tag_add("izquierda", "1.0")
+        self.txtbox_code.config(width=57, height=25)
+        self.txtbox_code.place(x=180, y=200, width=1200, height=300)
+
+        self.txtbox_console = Text(self.frame, font=("Consolas", 14), bg="blue4", fg="white")
+        self.txtbox_console.tag_configure("izquierda", justify='left')
+        self.txtbox_console.insert("1.0", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        self.txtbox_console.tag_add("izquierda", "1.0")
+        self.txtbox_console.config(width=57, height=25, state='disabled')
+        self.txtbox_console.place(x=180, y=510, width=1200, height=250)
 
         frame_btn = Frame(self.frame, bg="black")
-        frame_btn.place(x=410, y=175)
+        frame_btn.place(x=410, y=140)
 
         img1 = PhotoImage(file = "images/upload.png")
         play = Label(frame_btn, image = img1, bg="black")
@@ -41,7 +55,7 @@ class Interfaz:
         play.photo = img2
         play.grid(row=0, column=3, padx=5)
 
-        analizar_btn = Button(frame_btn, text="Analizar Código", font=("Ebrima", 15), bg="steel blue", command = lambda:[])
+        analizar_btn = Button(frame_btn, text="Analizar Código", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.analizar_codigo()])
         analizar_btn.grid(row=0, column=4)
 
         sep2 = Label(frame_btn, text="", bg="black")
@@ -57,7 +71,6 @@ class Interfaz:
 
     def abrirArchivo(self):
         global texto_lfp
-        global texto_cargado
         name_file = filedialog.askopenfilename(
             title = "Seleccionar archivo LFP",
             initialdir = "./",
@@ -70,20 +83,27 @@ class Interfaz:
             archivo = open(name_file)
             texto = ""
             texto = archivo.read()
-            texto += "$"
             texto_lfp = ""
             texto_lfp = texto
-            texto_cargado = True
-            print("->Archivo leído con éxito")
-            print(texto_lfp)
-            
-            #TODO Archivo en Textbox
-
+            print("->Archivo leído con éxito")            
+            self.txtbox_code.insert(END, texto_lfp)
             archivo.close()
             
         except Exception:
             traceback.print_exc()
             print("->No se seleccionó un archivo")
+    
+    def analizar_codigo(self):
+        global codigo
+        code = ""
+        code = self.txtbox_code.get(1.0, END)
+        if code != "\n":
+            code += "$"
+            codigo = ""
+            codigo = code
+        else:
+            self.txtbox_console.config(state='normal')
+            self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
 
 if __name__ == "__main__":
     ventana = Tk()
