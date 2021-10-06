@@ -8,6 +8,7 @@ codigo = ""
 palabras_reservadas = ["Claves", "Registros", "imprimir", "imprimirln", "conteo", "promedio", "contarsi", "datos", "sumar", "max", "min", "exportarReporte"]
 tokens_leidos = []
 errores_encontrados = []
+datos = [[]]
 
 class Interfaz:
     def __init__(self, window):
@@ -112,10 +113,11 @@ class Interfaz:
             tokens_leidos = []
             errores_encontrados = []
             self.analizador_lexico()
-            # print("TOKENS:")
+            self.analizador_sintactico()
+            # print(f"TOKENS: {len(tokens_leidos)}")
             # for token in tokens_leidos:
             #     print(token.nombre, str(token.lexema), str(token.fila), str(token.columna))
-            # print("ERRORES:")
+            # print(f"ERRORES: {len(errores_encontrados)}")
             # for error in errores_encontrados:
             #     print(error.caracter, error.tipo, error.descripcion, str(error.fila), str(error.columna))
         else:
@@ -139,7 +141,7 @@ class Interfaz:
         return False
     
     def is_ascii(self, caracter):
-        if ord(caracter) == 32 or ord(caracter) == 33 or (ord(caracter) >= 35 and ord(caracter) <= 154) or (ord(caracter) >= 160 and ord(caracter) <= 253):
+        if ord(caracter) == 9 or ord(caracter) == 10 or ord(caracter) == 32 or ord(caracter) == 33 or (ord(caracter) >= 35 and ord(caracter) <= 154) or (ord(caracter) >= 160 and ord(caracter) <= 253):
             return True
         return False
 
@@ -194,7 +196,9 @@ class Interfaz:
                     lexema_actual = ""
                     estado = "q7"
                 else:
-                    estado = "error"
+                    lexema_actual += caracter
+                    error = Error(caracter, "Léxico", f"El caracter no figura como caracter ASCII imprimible ({ord(caracter)}).", fila, columna+1)
+                    errores_encontrados.append(error)
             elif estado == "q2":
                 if self.is_number(caracter):
                     lexema_actual += caracter
@@ -248,7 +252,7 @@ class Interfaz:
                 if caracter == "'":
                     estado = "q9"
                 else:
-                    error = Error(caracter, "Léxico", "Se esperaba la segunda comilla simple de comentario multilínea.", fila, columna+1)
+                    error = Error(caracter, "Sintáctico", "Se esperaba la segunda comilla simple de comentario multilínea.", fila, columna+1)
                     errores_encontrados.append(error)
                     lexema_actual = ""
                     estado = "pre_validacion"
@@ -265,7 +269,7 @@ class Interfaz:
                 if caracter == "'":
                     estado = "q11"
                 else:
-                    error = Error(caracter, "Léxico", "Se esperaba la tercera comilla simple de comentario multilínea.", fila, columna+1)
+                    error = Error(caracter, "Sintáctico", "Se esperaba la tercera comilla simple de comentario multilínea.", fila, columna+1)
                     errores_encontrados.append(error)
                     lexema_actual = ""
                     estado = "pre_validacion"
@@ -288,7 +292,7 @@ class Interfaz:
                 if caracter == "'":
                     estado = "q13"
                 else:
-                    error = Error(caracter, "Léxico", "Se esperaba la segunda comilla simple que finaliza el comentario multilínea.", fila, columna+1)
+                    error = Error(caracter, "Sintáctico", "Se esperaba la segunda comilla simple que finaliza el comentario multilínea.", fila, columna+1)
                     errores_encontrados.append(error)
                     lexema_actual = ""
                     estado = "pre_validacion"
@@ -296,7 +300,7 @@ class Interfaz:
                 if caracter == "'":
                     estado = "q7"
                 else:
-                    error = Error(caracter, "Léxico", "Se esperaba la tercera comilla simple que finaliza el comentario multilínea.", fila, columna+1)
+                    error = Error(caracter, "Sintáctico", "Se esperaba la tercera comilla simple que finaliza el comentario multilínea.", fila, columna+1)
                     errores_encontrados.append(error)
                     lexema_actual = ""
                     estado = "pre_validacion"
@@ -347,6 +351,18 @@ class Interfaz:
                 columna += 1
             else: # otro caracter
                 columna +=1
+        if lexema_actual != "":
+            error = Error("N/A", "Sintáctico", "No vino la comilla doble que finaliza una cadena.", fila - 1, columna)
+            errores_encontrados.append(error)
+    
+    def analizador_sintactico(self):
+        global tokens_leidos
+        for token in tokens_leidos:
+            pass
+        self.txtbox_console.config(state='normal')
+        self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
+        self.txtbox_console.config(state='disabled')
+
 
 if __name__ == "__main__":
     ventana = Tk()
