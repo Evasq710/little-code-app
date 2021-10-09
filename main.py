@@ -16,66 +16,86 @@ class Interfaz:
         self.window.title('Bitxelart')        
         self.window.state('zoomed')
 
-        self.frame = Frame(self.window, bg="AntiqueWhite3")
+        self.frame = Frame(self.window, bg="DarkSlateGray")
         self.frame.place(x=0, y=0, relwidth=1, relheight=1)
 
         imagen = PhotoImage(file = "images/logo.png")
-        logo = Label(self.frame, image = imagen, bg="AntiqueWhite3")
+        logo = Label(self.frame, image = imagen, bg="DarkSlateGray")
         logo.photo = imagen
         logo.place(x=100, y=20, width=200, height=100)
 
-        title = Label(self.frame, text="Proyecto 2", font=("Ebrima", 60, "bold"), bg="AntiqueWhite3")
-        title.place(x=575, y=20)
+        title = Label(self.frame, text="Proyecto 2", font=("Ebrima", 60, "bold"), bg="DarkSlateGray", fg="white")
+        title.place(x=575, y=15)
 
-        lb_txt = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEXTBOX >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="AntiqueWhite3")
-        lb_txt.place(x=300, y=175)
+        lb_txt = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEXTBOX >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
+        lb_txt.place(x=300, y=125)
 
         self.txtbox_code = Text(self.frame, font=("Consolas", 14), bg="black", fg="white")
         self.txtbox_code.tag_configure("izquierda", justify='left')
         self.txtbox_code.insert("1.0", "")
         self.txtbox_code.tag_add("izquierda", "1.0")
         self.txtbox_code.config(width=57, height=25)
-        self.txtbox_code.place(x=300, y=200, width=1200, height=300)
+        self.txtbox_code.place(x=300, y=150, width=1200, height=300)
+
+        lb_txt2 = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
+        lb_txt2.place(x=300, y=455)
 
         self.txtbox_console = Text(self.frame, font=("Consolas", 14), bg="blue4", fg="white")
         self.txtbox_console.tag_configure("izquierda", justify='left')
-        self.txtbox_console.insert("1.0", "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        self.txtbox_console.insert("1.0", "")
         self.txtbox_console.tag_add("izquierda", "1.0")
         self.txtbox_console.config(width=57, height=25, state='disabled')
-        self.txtbox_console.place(x=300, y=510, width=1200, height=250)
+        self.txtbox_console.place(x=300, y=480, width=1200, height=250)
 
-        frame_btn = Frame(self.frame, bg="AntiqueWhite3")
-        frame_btn.place(x=50, y=250)
+        btn_clear = Button(self.frame, text="Limpiar Consola", font=("Ebrima", 15), bg="light blue", command = lambda:[self.txtbox_console.config(state='normal'), self.txtbox_console.delete(1.0, END), self.txtbox_console.config(state='disabled')])
+        btn_clear.place(x=820, y=735)
+
+        frame_btn = Frame(self.frame, bg="DarkSlateGray")
+        frame_btn.place(x=25, y=200)
 
         img1 = PhotoImage(file = "images/upload.png")
-        play = Label(frame_btn, image = img1, bg="AntiqueWhite3")
+        play = Label(frame_btn, image = img1, bg="DarkSlateGray")
         play.photo = img1
         play.grid(row=0, column=0, padx=10)
 
         abrir_btn = Button(frame_btn, text="Abrir Archivo", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.abrirArchivo()])
         abrir_btn.grid(row=0, column=1)
 
-        sep1 = Label(frame_btn, text="", bg="AntiqueWhite3")
-        sep1.grid(row=1, column=0, pady=40)
+        sep1 = Label(frame_btn, text="", bg="DarkSlateGray")
+        sep1.grid(row=1, column=0, pady=20)
 
         img2 = PhotoImage(file = "images/play.png")
-        play = Label(frame_btn, image = img2, bg="AntiqueWhite3")
+        play = Label(frame_btn, image = img2, bg="DarkSlateGray")
         play.photo = img2
         play.grid(row=2, column=0, padx=5)
 
         analizar_btn = Button(frame_btn, text="Analizar Código", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.obtener_codigo()])
         analizar_btn.grid(row=2, column=1)
 
-        sep2 = Label(frame_btn, text="", bg="AntiqueWhite3")
-        sep2.grid(row=3, column=0, pady=40)
+        sep2 = Label(frame_btn, text="", bg="DarkSlateGray")
+        sep2.grid(row=3, column=0, pady=20)
+
+        lb_txt3 = Label(frame_btn, text="Sección de reportes", font=("Ebrima bold", 16), bg="DarkSlateGray", fg="white")
+        lb_txt3.grid(row=4, column=1, pady=15)
+
+        list_reportes = [("Reporte de Tokens", 1), ("Reporte de Errores", 2), ("Árbol de derivación", 3)]
+        reporte = StringVar()
+        reporte.set("1")
+
+        row_num = 5
+        for (tipo_reporte, valor) in list_reportes:
+            Radiobutton(frame_btn, text=tipo_reporte, variable=reporte, value=valor, font=("Ebrima bold", 12), bg="white").grid(row=row_num, column=1, padx=10)
+            row_num += 1
+            Label(frame_btn, text="", bg="DarkSlateGray").grid(row=row_num, column=0, pady=2)
+            row_num += 1
 
         img3 = PhotoImage(file = "images/html.png")
-        play = Label(frame_btn, image = img3, bg="AntiqueWhite3")
+        play = Label(frame_btn, image = img3, bg="DarkSlateGray")
         play.photo = img3
-        play.grid(row=4, column=0, padx=10)
+        play.grid(row=row_num, column=0, padx=10)
 
-        reportes_btn = Button(frame_btn, text="Reportes", font=("Ebrima", 15), bg="steel blue", command = lambda:[])
-        reportes_btn.grid(row=4, column=1)
+        reportes_btn = Button(frame_btn, text="Generar Reporte", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.reporte(reporte.get())])
+        reportes_btn.grid(row=row_num, column=1)
 
     def abrirArchivo(self):
         global texto_lfp
@@ -363,6 +383,18 @@ class Interfaz:
         self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
         self.txtbox_console.config(state='disabled')
 
+    def reporte(self, value):
+        if value == "1":
+            # TODO Reporte Tokens
+            print("Reporte Tokens")
+        elif value == "2":
+            # TODO Reporte Errores
+            print("Reporte Errores")
+        elif value == "3":
+            # TODO Reporte Árbol
+            print("Reporte Arbol")
+        else:
+            print("Error: VALUE de reporte no reconocido.")
 
 if __name__ == "__main__":
     ventana = Tk()
