@@ -71,3 +71,37 @@ class Error:
         self.descripcion = descripcion
         self.fila = fila
         self.columna = columna
+    
+class Pila:
+    def __init__(self):
+        self.pila = []
+    
+    def guardar(self, valor = None, lista_valores = None):
+        if valor:
+            self.pila.append(valor)
+        elif lista_valores:
+            self.pila.extend(lista_valores)
+    
+    def sacar(self, valor):
+        if self.pila:
+            if self.pila[-1] == valor:
+                self.pila.pop()
+                return True
+        return False
+    
+    def reemplazar(self, antiguo, nuevo = None, lista_nuevos = None):
+        for index, valor in enumerate(self.pila):
+            if valor == antiguo:
+                if nuevo:
+                    self.pila[index] = nuevo
+                elif lista_nuevos:
+                    self.pila.pop(index)
+                    lista_nuevos.reverse()
+                    i = index
+                    for new in lista_nuevos:
+                        self.pila.insert(i, new)
+                        i += 1
+    
+    def recorrer(self):
+        for element in self.pila:
+            print(element)
