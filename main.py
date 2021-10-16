@@ -1,11 +1,25 @@
 from tkinter import *
 from tkinter import filedialog, messagebox
-from clases import Token, Error
+from clases import *
 import traceback
 
 texto_lfp = ""
 codigo = ""
 palabras_reservadas = ["Claves", "Registros", "imprimir", "imprimirln", "conteo", "promedio", "contarsi", "datos", "sumar", "max", "min", "exportarReporte"]
+producciones = {
+    "INICIO": [["INGRESO_DATOS", "OTRA_INS"], ["FUNCION", "OTRA_INS"]],
+    "INGRESO_DATOS": [[4, 17, 18, "COLUMNAS", 19], [5, 17, 18, "REGISTROS", 19]],
+    "COLUMNAS": [[1, "CADENAS"]],
+    "CADENAS": [[20, 1, "CADENAS"], None],
+    "REGISTROS": [[22, "VALOR", 23, "MULT_REGISTROS"]],
+    "VALOR": [[1, "VALORES"], [2, "VALORES"], [3, "VALORES"]],
+    "VALORES": [[20, "VALOR"], None],
+    "MULT_REGISTROS": [[22, "VALOR", 23, "MULT_REGISTROS"], None],
+    "FUNCION": [[6, 24, 1, 25, 21], [7, 24, 1, 25, 21], [8, 24, 25, 21], [9, 24, 1, 25, 21], [10, 24, 1, 20, "VALOR_F", 25, 21],
+    [11, 24, 25, 21], [12, 24, 1, 25, 21], [13, 24, 1, 25, 21], [14, 24, 1, 25, 21], [15, 24, 1, 25, 21]],
+    "VALOR_F": [[1], [2], [3]],
+    "OTRA_INS": [["INGRESO_DATOS", "OTRA_INS"], ["FUNCION", "OTRA_INS"], [None]]
+}
 tokens_leidos = []
 errores_encontrados = []
 datos = [[]]
@@ -384,29 +398,34 @@ class Interfaz:
     
     def analizador_sintactico(self):
         global tokens_leidos
+        pila = Pila()
+        # Estado i
+        pila.guardar('#')
+        # Estado p
+        pila.guardar('INICIO')
+        # Estado q
         for token in tokens_leidos:
+            num_id = token.id_token
             pass
+        # Estado f Aceptación
         self.txtbox_console.config(state='normal')
         self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
         self.txtbox_console.config(state='disabled')
 
     def reporte(self, value):
         if value == "1":
-            # TODO Reporte Tokens
             tokens_generados = self.reporte_tokens()
             if tokens_generados:
                 messagebox.showinfo("Reporte de tokens", "Reporte de Tokens generado exitosamente.")
             else:
                 messagebox.showerror("Reporte de tokens", "Ocurrió un error en la generación del reporte :(")
         elif value == "2":
-            # TODO Reporte Errores
             errores_generados = self.reporte_errores()
             if errores_generados:
                 messagebox.showinfo("Reporte de errores", "Reporte de Errores generado exitosamente.")
             else:
                 messagebox.showerror("Reporte de errores", "Ocurrió un error en la generación del reporte :(")
         elif value == "3":
-            # TODO Reporte Árbol
             print("Reporte Arbol")
         else:
             print("Error: VALUE de reporte no reconocido.")
