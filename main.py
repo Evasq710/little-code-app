@@ -6,23 +6,12 @@ import traceback
 texto_lfp = ""
 codigo = ""
 palabras_reservadas = ["Claves", "Registros", "imprimir", "imprimirln", "conteo", "promedio", "contarsi", "datos", "sumar", "max", "min", "exportarReporte"]
-producciones = {
-    "INICIO": [["INGRESO_DATOS", "OTRA_INS"], ["FUNCION", "OTRA_INS"]],
-    "INGRESO_DATOS": [[4, 17, 18, "COLUMNAS", 19], [5, 17, 18, "REGISTROS", 19]],
-    "COLUMNAS": [[1, "CADENAS"]],
-    "CADENAS": [[20, 1, "CADENAS"], None],
-    "REGISTROS": [[22, "VALOR", 23, "MULT_REGISTROS"]],
-    "VALOR": [[1, "VALORES"], [2, "VALORES"], [3, "VALORES"]],
-    "VALORES": [[20, "VALOR"], None],
-    "MULT_REGISTROS": [[22, "VALOR", 23, "MULT_REGISTROS"], None],
-    "FUNCION": [[6, 24, 1, 25, 21], [7, 24, 1, 25, 21], [8, 24, 25, 21], [9, 24, 1, 25, 21], [10, 24, 1, 20, "VALOR_F", 25, 21],
-    [11, 24, 25, 21], [12, 24, 1, 25, 21], [13, 24, 1, 25, 21], [14, 24, 1, 25, 21], [15, 24, 1, 25, 21]],
-    "VALOR_F": [[1], [2], [3]],
-    "OTRA_INS": [["INGRESO_DATOS", "OTRA_INS"], ["FUNCION", "OTRA_INS"], [None]]
-}
+index = 0
 tokens_leidos = []
 errores_encontrados = []
-datos = [[]]
+encabezados = []
+registros = []
+registro_aux = []
 
 class Interfaz:
     def __init__(self, window):
@@ -44,7 +33,7 @@ class Interfaz:
         lb_txt = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEXTBOX >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
         lb_txt.place(x=300, y=125)
 
-        self.txtbox_code = Text(self.frame, font=("Consolas", 14), bg="black", fg="white")
+        self.txtbox_code = Text(self.frame, font=("Consolas", 14))
         self.txtbox_code.tag_configure("izquierda", justify='left')
         self.txtbox_code.insert("1.0", "")
         self.txtbox_code.tag_add("izquierda", "1.0")
@@ -398,19 +387,199 @@ class Interfaz:
     
     def analizador_sintactico(self):
         global tokens_leidos
-        pila = Pila()
-        # Estado i
-        pila.guardar('#')
-        # Estado p
-        pila.guardar('INICIO')
-        # Estado q
-        for token in tokens_leidos:
-            num_id = token.id_token
-            pass
-        # Estado f Aceptación
+        global index
+        tokens_leidos.append("#")
+        index = 0
+        self.inicio()
+        tokens_leidos.pop()
         self.txtbox_console.config(state='normal')
-        self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
+        self.txtbox_console.insert(END, "\n>> Fin de análisis de código\n")
         self.txtbox_console.config(state='disabled')
+    
+    def inicio(self):
+        global tokens_leidos
+        global index
+        global encabezados
+        global registros
+        global registro_aux
+        id_token = tokens_leidos[index].id_token
+        if id_token == 4: # Claves
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 17: # Igual
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 18: # Abre Corchete
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 1: # Cadena
+                                    encabezados.append(tokens_leidos[index].lexema)
+                                    self.cadenas()
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 19: # Cierra Corchete
+                                        # Se leyeron las claves correctamente
+                                        self.otra_ins()
+        elif id_token == 5: # Registros
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 17: # Igual
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 18: # Abre Corchete
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 22: # Abre llave
+                                    registro_aux = []
+                                    self.valor()
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 23: # Cierra Llave
+                                        # Registro leído correctamente
+                                        registros.append(registro_aux)
+                                        registro_aux = []
+                                        self.mult_registros()
+                                        registro_aux = []
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 19: # Cierra Corchete
+                                            # Se leyeron todos los registros correctamente
+                                            self.otra_ins()
+        elif id_token == 6: # imprimir
+            cadena_aux = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            cadena_aux = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función imprimir correcta
+                                            self.txtbox_console.config(state='normal')
+                                            self.txtbox_console.insert(END, cadena_aux)
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
+        elif id_token == 7: # imprimirln
+            cadena_aux = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            cadena_aux = tokens_leidos[index].lexema
+                            cadena_aux += "\n"
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función imprimir correcta
+                                            self.txtbox_console.config(state='normal')
+                                            self.txtbox_console.insert(END, cadena_aux)
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
+        elif id_token == 8: # conteo
+            pass
+        elif id_token == 9: # promedio
+            pass
+        elif id_token == 10: # contarsi
+            pass
+        elif id_token == 11: # datos
+            pass
+        elif id_token == 12: # sumar
+            pass
+        elif id_token == 13: # max
+            pass
+        elif id_token == 14: # min
+            pass
+        elif id_token == 15: # exportarReporte
+            pass
+        else:
+            # TODO Error sintáctico
+            pass
+
+    def cadenas(self):
+        global tokens_leidos
+        global index
+        global encabezados
+        index += 1
+        if index < (len(tokens_leidos) - 1):
+            id_token = tokens_leidos[index].id_token
+            if id_token == 20: # Coma
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 1: # Cadena
+                        encabezados.append(tokens_leidos[index].lexema)
+                        self.cadenas()
+    
+    def valor(self):
+        global tokens_leidos
+        global index
+        global registro_aux
+        index += 1
+        if index < (len(tokens_leidos) - 1):
+            id_token = tokens_leidos[index].id_token
+            if id_token == 1: # Cadena
+                registro_aux.append(tokens_leidos[index].lexema)
+                self.valores()
+            elif id_token == 2: # Entero
+                registro_aux.append(tokens_leidos[index].lexema)
+                self.valores()
+            elif id_token == 3: # Decimal
+                registro_aux.append(tokens_leidos[index].lexema)
+                self.valores()
+    
+    def valores(self,):
+        global tokens_leidos
+        global index
+        index += 1
+        if index < (len(tokens_leidos) - 1):
+            id_token = tokens_leidos[index].id_token
+            if id_token == 20: # Coma
+                self.valor()
+
+    def mult_registros(self):
+        global tokens_leidos
+        global index
+        global registros
+        global registro_aux
+        index += 1
+        if index < (len(tokens_leidos) - 1):
+            id_token = tokens_leidos[index].id_token
+            if id_token == 22: # Abre llave
+                self.valor()
+                id_token = tokens_leidos[index].id_token
+                if id_token == 23: # Cierra Llave
+                    # Registro leído correctamente
+                    registros.append(registro_aux)
+                    registro_aux = []
+                    self.mult_registros()
+
+    def otra_ins(self):
+        global index
+        index += 1
+        if index < (len(tokens_leidos) - 1):
+            self.inicio()
 
     def reporte(self, value):
         if value == "1":
