@@ -33,7 +33,7 @@ class Interfaz:
         lb_txt = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEXTBOX >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
         lb_txt.place(x=300, y=125)
 
-        self.txtbox_code = Text(self.frame, font=("Consolas", 14))
+        self.txtbox_code = Text(self.frame, font=("Consolas", 13))
         self.txtbox_code.tag_configure("izquierda", justify='left')
         self.txtbox_code.insert("1.0", "")
         self.txtbox_code.tag_add("izquierda", "1.0")
@@ -43,12 +43,15 @@ class Interfaz:
         lb_txt2 = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
         lb_txt2.place(x=300, y=455)
 
-        self.txtbox_console = Text(self.frame, font=("Consolas", 14), bg="blue4", fg="white")
+        self.txtbox_console = Text(self.frame, font=("Consolas", 13), bg="blue4", fg="white")
         self.txtbox_console.tag_configure("izquierda", justify='left')
         self.txtbox_console.insert("1.0", "")
         self.txtbox_console.tag_add("izquierda", "1.0")
         self.txtbox_console.config(width=57, height=25, state='disabled')
-        self.txtbox_console.place(x=300, y=480, width=1200, height=250)
+        self.txtbox_console.place(x=300, y=480, width=1200, height=250) 
+
+        self.txtbox_console.tag_config('Negrita', background='#560714', font=("Consolas", 13, "bold"))
+        self.txtbox_console.tag_config('Contenido', background='#7B4F57')
 
         btn_clear = Button(self.frame, text="Limpiar Consola", font=("Ebrima", 15), bg="light blue", command = lambda:[self.txtbox_console.config(state='normal'), self.txtbox_console.delete(1.0, END), self.txtbox_console.config(state='disabled')])
         btn_clear.place(x=820, y=735)
@@ -388,8 +391,12 @@ class Interfaz:
     def analizador_sintactico(self):
         global tokens_leidos
         global index
+        global encabezados
+        global registros
         tokens_leidos.append("#")
         index = 0
+        encabezados = []
+        registros = []
         self.inicio()
         tokens_leidos.pop()
         self.txtbox_console.config(state='normal')
@@ -498,20 +505,310 @@ class Interfaz:
                                             self.txtbox_console.config(state='disabled')
                                             self.otra_ins()
         elif id_token == 8: # conteo
-            pass
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 25: # Cierra paréntesis
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 21: # Punto y coma
+                                    # Función conteo correcta
+                                    cantidad_registros = len(encabezados)*len(registros)
+                                    cantidad_registros = str(cantidad_registros) + '\n'
+                                    self.txtbox_console.config(state='normal')
+                                    self.txtbox_console.insert(END, cantidad_registros)
+                                    self.txtbox_console.config(state='disabled')
+                                    self.otra_ins()
         elif id_token == 9: # promedio
-            pass
+            campo = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función promedio correcta
+                                            self.txtbox_console.config(state='normal')
+                                            pos = 0
+                                            se_encontro = False
+                                            for titulo in encabezados:
+                                                if titulo == campo:
+                                                    se_encontro = True
+                                                    suma = 0
+                                                    filas = 0
+                                                    hay_cadenas = False
+                                                    for fila in registros:
+                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                            suma += fila[pos]
+                                                            filas += 1
+                                                        else:
+                                                            hay_cadenas = True
+                                                            break
+                                                    if not hay_cadenas:
+                                                        promedio = suma/filas
+                                                        self.txtbox_console.insert(END, str(promedio))
+                                                    else:
+                                                        self.txtbox_console.insert(END, ">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal.")
+                                                    self.txtbox_console.insert(END, "\n")
+                                                    break
+                                                pos += 1
+                                            if not se_encontro:
+                                                self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n")
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
         elif id_token == 10: # contarsi
-            pass
+            campo = ""
+            valor = None
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 20: # Coma
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 1 or id_token == 2 or id_token == 3: # Cadena | Entero | Decimal
+                                            valor = tokens_leidos[index].lexema
+                                            index += 1
+                                            if index < (len(tokens_leidos) - 1):
+                                                id_token = tokens_leidos[index].id_token
+                                                if id_token == 25: # Cierra paréntesis
+                                                    index += 1
+                                                    if index < (len(tokens_leidos) - 1):
+                                                        id_token = tokens_leidos[index].id_token
+                                                        if id_token == 21: # Punto y coma
+                                                            # Función contarsi correcta
+                                                            self.txtbox_console.config(state='normal')
+                                                            pos = 0
+                                                            se_encontro = False
+                                                            for titulo in encabezados:
+                                                                if titulo == campo:
+                                                                    se_encontro = True
+                                                                    contador = 0
+                                                                    for fila in registros:
+                                                                        if fila[pos] == valor:
+                                                                            contador += 1
+                                                                    self.txtbox_console.insert(END, str(contador))
+                                                                    self.txtbox_console.insert(END, "\n")
+                                                                    break
+                                                                pos += 1
+                                                            if not se_encontro:
+                                                                self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n")
+                                                            self.txtbox_console.config(state='disabled')
+                                                            self.otra_ins()
         elif id_token == 11: # datos
-            pass
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 25: # Cierra paréntesis
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 21: # Punto y coma
+                                    # Función datos correcta
+                                    self.txtbox_console.config(state='normal', )
+                                    self.txtbox_console.insert(END, " ")
+                                    for titulo in encabezados:
+                                        salida = "[ " + titulo + " ]"
+                                        self.txtbox_console.insert(END, salida, "Negrita")
+                                        self.txtbox_console.insert(END, "\t")
+                                    self.txtbox_console.insert(END, "\n")
+                                    for registro in registros:
+                                        self.txtbox_console.insert(END, " ")
+                                        pos = 0
+                                        for element in registro:
+                                            len_titulo = len(encabezados[pos])
+                                            if (len_titulo - len(str(element))) > 1:
+                                                espacios = int((len_titulo-len(str(element)))/2)
+                                                spc = ""
+                                                for i in range(espacios):
+                                                    spc += " " 
+                                                salida = "[ " + spc + str(element) + spc + " ]"
+                                            else:
+                                                salida = "[ " + str(element) + " ]"
+                                            self.txtbox_console.insert(END, salida, "Contenido")
+                                            self.txtbox_console.insert(END, "\t")
+                                            pos += 1
+                                        self.txtbox_console.insert(END, "\n")
+                                    self.txtbox_console.config(state='disabled')
+                                    self.otra_ins()
         elif id_token == 12: # sumar
-            pass
+            campo = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función sumar correcta
+                                            self.txtbox_console.config(state='normal')
+                                            pos = 0
+                                            se_encontro = False
+                                            for titulo in encabezados:
+                                                if titulo == campo:
+                                                    se_encontro = True
+                                                    suma = 0
+                                                    hay_cadenas = False
+                                                    for fila in registros:
+                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                            suma += fila[pos]
+                                                        else:
+                                                            hay_cadenas = True
+                                                            break
+                                                    if not hay_cadenas:
+                                                        self.txtbox_console.insert(END, str(suma))
+                                                    else:
+                                                        self.txtbox_console.insert(END, ">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal.")
+                                                    self.txtbox_console.insert(END, "\n")
+                                                    break
+                                                pos += 1
+                                            if not se_encontro:
+                                                self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n")
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
         elif id_token == 13: # max
-            pass
+            campo = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función max correcta
+                                            self.txtbox_console.config(state='normal')
+                                            pos = 0
+                                            se_encontro = False
+                                            for titulo in encabezados:
+                                                if titulo == campo:
+                                                    se_encontro = True
+                                                    max_campo = None
+                                                    if len(registros)>0:
+                                                        max_campo = registros[0][pos]
+                                                    hay_cadenas = False
+                                                    for fila in registros:
+                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                            if fila[pos] > max_campo:
+                                                                max_campo = fila[pos]
+                                                        else:
+                                                            hay_cadenas = True
+                                                            break
+                                                    if not hay_cadenas:
+                                                        if max_campo:
+                                                            self.txtbox_console.insert(END, str(max_campo))
+                                                        else:
+                                                            self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.")
+                                                    else:
+                                                        self.txtbox_console.insert(END, ">> Error en la función max. Todos los valores deben ser de tipo entero o decimal.")
+                                                    self.txtbox_console.insert(END, "\n")
+                                                    break
+                                                pos += 1
+                                            if not se_encontro:
+                                                self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n")
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
         elif id_token == 14: # min
-            pass
+            campo = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función min correcta
+                                            self.txtbox_console.config(state='normal')
+                                            pos = 0
+                                            se_encontro = False
+                                            for titulo in encabezados:
+                                                if titulo == campo:
+                                                    se_encontro = True
+                                                    min_campo = None
+                                                    if len(registros)>0:
+                                                        min_campo = registros[0][pos]
+                                                    hay_cadenas = False
+                                                    for fila in registros:
+                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                            if fila[pos] < min_campo:
+                                                                min_campo = fila[pos]
+                                                        else:
+                                                            hay_cadenas = True
+                                                            break
+                                                    if not hay_cadenas:
+                                                        if min_campo:
+                                                            self.txtbox_console.insert(END, str(min_campo))
+                                                        else:
+                                                            self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.")
+                                                    else:
+                                                        self.txtbox_console.insert(END, ">> Error en la función min. Todos los valores deben ser de tipo entero o decimal.")
+                                                    self.txtbox_console.insert(END, "\n")
+                                                    break
+                                                pos += 1
+                                            if not se_encontro:
+                                                self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n")
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
         elif id_token == 15: # exportarReporte
+            # TODO EXPORTAR REPORTE
             pass
         else:
             # TODO Error sintáctico
