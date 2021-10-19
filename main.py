@@ -43,15 +43,14 @@ class Interfaz:
         lb_txt2 = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
         lb_txt2.place(x=300, y=455)
 
-        self.txtbox_console = Text(self.frame, font=("Consolas", 13), bg="blue4", fg="white")
+        self.txtbox_console = Text(self.frame, font=("Consolas", 13), bg="black", fg="white")
         self.txtbox_console.tag_configure("izquierda", justify='left')
         self.txtbox_console.insert("1.0", "")
         self.txtbox_console.tag_add("izquierda", "1.0")
         self.txtbox_console.config(width=57, height=25, state='disabled')
         self.txtbox_console.place(x=300, y=480, width=1200, height=250) 
 
-        self.txtbox_console.tag_config('Negrita', background='#560714', font=("Consolas", 13, "bold"))
-        self.txtbox_console.tag_config('Contenido', background='#7B4F57')
+        self.txtbox_console.tag_config('Negrita', font=("Consolas", 13, "bold"))
 
         btn_clear = Button(self.frame, text="Limpiar Consola", font=("Ebrima", 15), bg="light blue", command = lambda:[self.txtbox_console.config(state='normal'), self.txtbox_console.delete(1.0, END), self.txtbox_console.config(state='disabled')])
         btn_clear.place(x=820, y=735)
@@ -647,14 +646,14 @@ class Interfaz:
                                         for element in registro:
                                             len_titulo = len(encabezados[pos])
                                             if (len_titulo - len(str(element))) > 1:
-                                                espacios = int((len_titulo-len(str(element)))/2)
+                                                espacios = round((len_titulo-len(str(element)))/2)
                                                 spc = ""
                                                 for i in range(espacios):
                                                     spc += " " 
                                                 salida = "[ " + spc + str(element) + spc + " ]"
                                             else:
                                                 salida = "[ " + str(element) + " ]"
-                                            self.txtbox_console.insert(END, salida, "Contenido")
+                                            self.txtbox_console.insert(END, salida)
                                             self.txtbox_console.insert(END, "\t")
                                             pos += 1
                                         self.txtbox_console.insert(END, "\n")
@@ -808,8 +807,33 @@ class Interfaz:
                                             self.txtbox_console.config(state='disabled')
                                             self.otra_ins()
         elif id_token == 15: # exportarReporte
-            # TODO EXPORTAR REPORTE
-            pass
+            campo = ""
+            index += 1
+            if index < (len(tokens_leidos) - 1):
+                id_token = tokens_leidos[index].id_token
+                if id_token == 24: # Abre paréntesis
+                    index += 1
+                    if index < (len(tokens_leidos) - 1):
+                        id_token = tokens_leidos[index].id_token
+                        if id_token == 1: # Cadena
+                            campo = tokens_leidos[index].lexema
+                            index += 1
+                            if index < (len(tokens_leidos) - 1):
+                                id_token = tokens_leidos[index].id_token
+                                if id_token == 25: # Cierra paréntesis
+                                    index += 1
+                                    if index < (len(tokens_leidos) - 1):
+                                        id_token = tokens_leidos[index].id_token
+                                        if id_token == 21: # Punto y coma
+                                            # Función exportarReporte correcta
+                                            self.txtbox_console.config(state='normal')
+                                            generado = self.reporte_ejecucion(campo)
+                                            if generado:
+                                                self.txtbox_console.insert(END, ">> Reporte generado con éxito (Reportes HTML/reporte.html)\n")
+                                            else:
+                                                self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n")
+                                            self.txtbox_console.config(state='disabled')
+                                            self.otra_ins()
         else:
             # TODO Error sintáctico
             pass
@@ -877,6 +901,168 @@ class Interfaz:
         index += 1
         if index < (len(tokens_leidos) - 1):
             self.inicio()
+    
+    def reporte_ejecucion(self, titulo):
+        global tokens_leidos
+        global index
+        global encabezados
+        global registros
+        html = f'''<!DOCTYPE html>
+        <html lang="es">
+        <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="reporte.css" type="text/css" />
+        <title>Reporte Datos Guardados</title>
+        </head>
+        <body>
+        <header>
+            <li><span class="material-icons md-dark md-100">summarize</span></li>
+            <h1>{titulo}</h1>
+        </header>
+        <div class="container">
+            <div class="tabla-reporte">
+                <table class="table table-striped table-hover">
+                    <thead style="background-color: black; color: white;">
+                        <tr>\n'''
+        for title in encabezados:
+            html += f'<th scope="col">{title}</th>\n'
+        html += '''</tr>\n</thead>\n<tbody>\n'''
+        id_fila = ""
+        registro_agregado = 0
+        try:
+            for registro in registros:
+                registro_agregado += 1
+                id_fila = "uno" if registro_agregado % 2 == 1 else "dos"
+                html += f'<tr id="{id_fila}">\n'
+                for element in registro:
+                    html += f'<td>{element}</td>\n'
+                html += '</tr>\n'
+        except:
+            traceback.print_exc()
+            return False
+        html += '''                    </tbody>
+                </table>
+            </div>
+        </div>
+        <footer>
+            <p>Elías Abraham Vasquez Soto - 201900131</p>
+            <p>Proyecto 2 - Laboratorio Lenguajes Formales y de Programación B-</p>        
+            <img src="images/logo_usac.png" width="220" height="60"/>
+        </footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        </body>
+        </html>'''
+        css = '''* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Lato', sans-serif;
+        }
+
+        html {
+            min-height: 100%;
+            position: relative;
+        }
+
+        body {
+            background-color:rgb(236, 239, 243);
+            padding-top: 20px;
+            margin-bottom: 150px;
+        }
+
+        /* ===== Iconos de Google ===== */
+        /* Rules for sizing the icon. */
+        .material-icons.md-24 { font-size: 24px; }
+        .material-icons.md-30 { font-size: 30px; }
+        .material-icons.md-100 { font-size: 100px; }
+        /* Rules for using icons as black on a light background. */
+        .material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+        .material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+        /* Rules for using icons as white on a dark background. */
+        .material-icons.md-light { color: rgba(255, 255, 255, 1); }
+        .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
+        header {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        header h1 {
+            font-size: 75px;
+        }
+
+        .container {
+            background-color: rgb(6, 80, 99);
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 50px;
+            margin: 30px 100px 30px 100px;
+        }
+
+        .tabla-reporte {
+            padding-top: 20px;
+            padding-left: 20px;
+            padding-right: 40px;
+            text-align: center;
+            font-size: 20px;
+            letter-spacing: 1px;
+            overflow-x: scroll;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        table thead{    
+            color: white;
+        }
+
+        table td, th {
+            width: 220px;
+            vertical-align: middle;
+        }
+
+        #uno {
+            background-color: rgb(221, 202, 177);
+        }
+
+        #dos {
+            background-color: rgb(238, 236, 231);
+        }
+
+        footer {
+            color: white;
+            line-height: 10px;
+            text-align: center;
+            padding-top: 20px;
+            padding-bottom: 5px;
+            font-size: 15px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-image: url("images/footer.png");
+        }'''
+        try:
+            reporte = open("Reportes HTML/reporte.html", "w",encoding="utf8")
+            reporte.write(html)
+            reporte.close()
+            print("->HTML Reporte generado")
+            css_reporte = open("Reportes HTML/reporte.css", "w",encoding="utf8")
+            css_reporte.write(css)
+            css_reporte.close()
+            print("->CSS Reporte generado")
+            return True
+        except:
+            traceback.print_exc()
+            return False
 
     def reporte(self, value):
         if value == "1":
