@@ -65,12 +65,14 @@ class Token:
             print(f"->ERROR: {nombre} no es un nombre de token válido")
 
 class Error:
-    def __init__ (self, caracter, tipo, descripcion, fila = None, columna = None):
+    def __init__ (self, caracter, tipo, descripcion, fila = None, columna = None, lexema = None, recuperado = False):
         self.caracter = caracter
         self.tipo = tipo
         self.descripcion = descripcion
         self.fila = fila
         self.columna = columna
+        self.lexema = lexema
+        self.recuperado = recuperado
     
 class Pila:
     def __init__(self):

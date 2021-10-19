@@ -12,6 +12,7 @@ errores_encontrados = []
 encabezados = []
 registros = []
 registro_aux = []
+flag_final = False
 
 class Interfaz:
     def __init__(self, window):
@@ -19,68 +20,75 @@ class Interfaz:
         self.window.title('Bitxelart')        
         self.window.state('zoomed')
 
-        self.frame = Frame(self.window, bg="DarkSlateGray")
+        self.frame = Frame(self.window, bg="#05323D")
         self.frame.place(x=0, y=0, relwidth=1, relheight=1)
 
         imagen = PhotoImage(file = "images/logo.png")
-        logo = Label(self.frame, image = imagen, bg="DarkSlateGray")
+        logo = Label(self.frame, image = imagen, bg="#05323D")
         logo.photo = imagen
-        logo.place(x=100, y=20, width=200, height=100)
+        logo.place(x=480, y=15, width=200, height=100)
 
-        title = Label(self.frame, text="Proyecto 2", font=("Ebrima", 60, "bold"), bg="DarkSlateGray", fg="white")
-        title.place(x=575, y=15)
-
-        lb_txt = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TEXTBOX >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
-        lb_txt.place(x=300, y=125)
+        title = Label(self.frame, text="Little Code", font=("Consolas", 40, "bold"), bg="#05323D", fg="white")
+        title.place(x=680, y=15)
 
         self.txtbox_code = Text(self.frame, font=("Consolas", 13))
         self.txtbox_code.tag_configure("izquierda", justify='left')
         self.txtbox_code.insert("1.0", "")
         self.txtbox_code.tag_add("izquierda", "1.0")
         self.txtbox_code.config(width=57, height=25)
-        self.txtbox_code.place(x=300, y=150, width=1200, height=300)
+        self.txtbox_code.place(x=300, y=120, width=1150, height=280)
 
-        lb_txt2 = Label(self.frame, text="<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONSOLA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", font=("Consolas", 14), bg="DarkSlateGray", fg="AntiqueWhite")
-        lb_txt2.place(x=300, y=455)
+        lb_txt2 = Label(self.frame, text="==================================================== CONSOLA ====================================================", font=("Consolas", 14), bg="#05323D", fg="AntiqueWhite")
+        lb_txt2.place(x=300, y=405)
 
-        self.txtbox_console = Text(self.frame, font=("Consolas", 13), bg="black", fg="white")
+        self.txtbox_console = Text(self.frame, font=("Consolas", 13), bg="black", fg="white", wrap="none")
         self.txtbox_console.tag_configure("izquierda", justify='left')
         self.txtbox_console.insert("1.0", "")
         self.txtbox_console.tag_add("izquierda", "1.0")
         self.txtbox_console.config(width=57, height=25, state='disabled')
-        self.txtbox_console.place(x=300, y=480, width=1200, height=250) 
+        self.txtbox_console.place(x=300, y=430, width=1150, height=300) 
+
+        scroll_x = Scrollbar(self.txtbox_console, orient='horizontal')
+        scroll_x.pack(side=BOTTOM, fill=X)
+
+        self.txtbox_console.config(xscrollcommand=scroll_x.set)
+        scroll_x.config(command=self.txtbox_console.xview)
+
 
         self.txtbox_console.tag_config('Negrita', font=("Consolas", 13, "bold"))
+        self.txtbox_console.tag_config('Fin', font=("Consolas", 13, "bold"), foreground="#41AA0E")
+        self.txtbox_console.tag_config('Error', font=("Consolas", 13, "bold"), foreground="#C81010")
+        self.txtbox_console.tag_config('Exito', font=("Consolas", 13, 'bold'), foreground='#99DCF2')
 
         btn_clear = Button(self.frame, text="Limpiar Consola", font=("Ebrima", 15), bg="light blue", command = lambda:[self.txtbox_console.config(state='normal'), self.txtbox_console.delete(1.0, END), self.txtbox_console.config(state='disabled')])
-        btn_clear.place(x=820, y=735)
+        btn_clear.place(x=800, y=735)
 
-        frame_btn = Frame(self.frame, bg="DarkSlateGray")
+        frame_btn = Frame(self.frame, bg="#05323D")
         frame_btn.place(x=25, y=200)
 
         img1 = PhotoImage(file = "images/upload.png")
-        play = Label(frame_btn, image = img1, bg="DarkSlateGray")
+        play = Label(frame_btn, image = img1, bg="#05323D")
         play.photo = img1
         play.grid(row=0, column=0, padx=10)
 
         abrir_btn = Button(frame_btn, text="Abrir Archivo", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.abrirArchivo()])
         abrir_btn.grid(row=0, column=1)
 
-        sep1 = Label(frame_btn, text="", bg="DarkSlateGray")
+        sep1 = Label(frame_btn, text="", bg="#05323D")
         sep1.grid(row=1, column=0, pady=20)
 
         img2 = PhotoImage(file = "images/play.png")
-        play = Label(frame_btn, image = img2, bg="DarkSlateGray")
+        play = Label(frame_btn, image = img2, bg="#05323D")
         play.photo = img2
         play.grid(row=2, column=0, padx=5)
 
         analizar_btn = Button(frame_btn, text="Analizar Código", font=("Ebrima", 15), bg="steel blue", command = lambda:[self.obtener_codigo()])
         analizar_btn.grid(row=2, column=1)
 
-        sep2 = Label(frame_btn, text="", bg="DarkSlateGray")
+        sep2 = Label(frame_btn, text="", bg="#05323D")
         sep2.grid(row=3, column=0, pady=20)
 
-        lb_txt3 = Label(frame_btn, text="Sección de reportes", font=("Ebrima bold", 16), bg="DarkSlateGray", fg="white")
+        lb_txt3 = Label(frame_btn, text="Sección de reportes", font=("Ebrima bold", 16), bg="#05323D", fg="white")
         lb_txt3.grid(row=4, column=1, pady=15)
 
         list_reportes = [("Reporte de Tokens", 1), ("Reporte de Errores", 2), ("Árbol de derivación", 3)]
@@ -91,11 +99,11 @@ class Interfaz:
         for (tipo_reporte, valor) in list_reportes:
             Radiobutton(frame_btn, text=tipo_reporte, variable=reporte, value=valor, font=("Ebrima bold", 12), bg="white").grid(row=row_num, column=1, padx=10)
             row_num += 1
-            Label(frame_btn, text="", bg="DarkSlateGray").grid(row=row_num, column=0, pady=2)
+            Label(frame_btn, text="", bg="#05323D").grid(row=row_num, column=0, pady=2)
             row_num += 1
 
         img3 = PhotoImage(file = "images/html.png")
-        play = Label(frame_btn, image = img3, bg="DarkSlateGray")
+        play = Label(frame_btn, image = img3, bg="#05323D")
         play.photo = img3
         play.grid(row=row_num, column=0, padx=10)
 
@@ -139,15 +147,12 @@ class Interfaz:
             errores_encontrados = []
             self.analizador_lexico()
             self.analizador_sintactico()
-            # print(f"TOKENS: {len(tokens_leidos)}")
-            # for token in tokens_leidos:
-            #     print(token.nombre, str(token.lexema), str(token.fila), str(token.columna))
-            # print(f"ERRORES: {len(errores_encontrados)}")
-            # for error in errores_encontrados:
-            #     print(error.caracter, error.tipo, error.descripcion, str(error.fila), str(error.columna))
+            print(f"ERRORES: {len(errores_encontrados)}")
+            for error in errores_encontrados:
+                print(error.caracter, error.tipo, error.descripcion, str(error.fila), str(error.columna))
         else:
             self.txtbox_console.config(state='normal')
-            self.txtbox_console.insert(END, ">> Fin de análisis de código\n")
+            self.txtbox_console.insert(END, ">> Fin de análisis de código. No se encontraron errores léxicos ni sintácticos.\n", 'Fin')
             self.txtbox_console.config(state='disabled')
 
     def is_number(self, caracter):
@@ -389,160 +394,304 @@ class Interfaz:
     
     def analizador_sintactico(self):
         global tokens_leidos
+        global errores_encontrados
         global index
         global encabezados
         global registros
+        global flag_final
         tokens_leidos.append("#")
         index = 0
         encabezados = []
         registros = []
+        flag_final = False
         self.inicio()
         tokens_leidos.pop()
         self.txtbox_console.config(state='normal')
-        self.txtbox_console.insert(END, "\n>> Fin de análisis de código\n")
+        if len(errores_encontrados) > 0:
+            self.txtbox_console.insert(END, f"\n>> Fin de análisis de código. Se encontraron {len(errores_encontrados)} errores léxicos/sintácticos, se recomienda generar 'Reporte de Errores'.\n", 'Fin')
+        else:
+            self.txtbox_console.insert(END, "\n>> Fin de análisis de código. No se encontraron errores léxicos ni sintácticos.\n", 'Fin')
         self.txtbox_console.config(state='disabled')
     
     def inicio(self):
         global tokens_leidos
+        global errores_encontrados
         global index
         global encabezados
         global registros
         global registro_aux
-        id_token = tokens_leidos[index].id_token
-        if id_token == 4: # Claves
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 17: # Igual
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 18: # Abre Corchete
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 1: # Cadena
-                                    encabezados.append(tokens_leidos[index].lexema)
-                                    self.cadenas()
+        if index < (len(tokens_leidos) - 1):
+            id_token = tokens_leidos[index].id_token
+            if id_token == 4: # Claves
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 17: # Igual
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 18: # Abre Corchete
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
-                                    if id_token == 19: # Cierra Corchete
-                                        # Se leyeron las claves correctamente
+                                    if id_token == 1: # Cadena
+                                        encabezados.append(tokens_leidos[index].lexema)
+                                        final = self.cadenas()
+                                        if not final:
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 19: # Cierra Corchete
+                                                # Se leyeron las claves correctamente
+                                                self.otra_ins()
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, sin asignación de valores.")
+                    errores_encontrados.append(error)
+            elif id_token == 5: # Registros
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 17: # Igual
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 18: # Abre Corchete
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 22: # Abre llave
+                                        registro_aux = []
+                                        self.valor()
+                                        if not flag_final:
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 23: # Cierra Llave
+                                                # Registro leído correctamente
+                                                registros.append(registro_aux)
+                                                registro_aux = []
+                                                self.mult_registros()
+                                                if not flag_final:
+                                                    registro_aux = []
+                                                    id_token = tokens_leidos[index].id_token
+                                                    if id_token == 19: # Cierra Corchete
+                                                        # Se leyeron todos los registros correctamente
+                                                        self.otra_ins()
+                                                else:
+                                                    #FIN DE LECTURA DE TOKENS
+                                                    if len(registro_aux) > 0:
+                                                        error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.", recuperado = True)
+                                                        registros.append(registro_aux)
+                                                    else:
+                                                        error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.")
+                                                    errores_encontrados.append(error)                                                    
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            if len(registro_aux) > 0:
+                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.", recuperado = True)
+                                                registros.append(registro_aux)
+                                            else:
+                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.")
+                                            errores_encontrados.append(error)
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, con asignación de valores inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, sin asignación de valores.")
+                    errores_encontrados.append(error)
+            elif id_token == 6: # imprimir
+                cadena_aux = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                cadena_aux = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función imprimir correcta
+                                                self.txtbox_console.config(state='normal')
+                                                self.txtbox_console.insert(END, cadena_aux)
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, no vino el token ';' que finaliza la función.", recuperado=True)
+                                            errores_encontrados.append(error)
+                                            self.txtbox_console.config(state='normal')
+                                            self.txtbox_console.insert(END, cadena_aux)
+                                            self.txtbox_console.config(state='disabled')
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, no vinieron los tokens ');' que finaliza la función.", recuperado=True)
+                                    errores_encontrados.append(error)
+                                    self.txtbox_console.config(state='normal')
+                                    self.txtbox_console.insert(END, cadena_aux)
+                                    self.txtbox_console.config(state='disabled')
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 7: # imprimirln
+                cadena_aux = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                cadena_aux = tokens_leidos[index].lexema
+                                cadena_aux += "\n"
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función imprimir correcta
+                                                self.txtbox_console.config(state='normal')
+                                                self.txtbox_console.insert(END, cadena_aux)
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, no vino el token ';' que finaliza la función.", recuperado=True)
+                                            errores_encontrados.append(error)
+                                            self.txtbox_console.config(state='normal')
+                                            self.txtbox_console.insert(END, cadena_aux)
+                                            self.txtbox_console.config(state='disabled')
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, no vinieron los tokens ');' que finaliza la función.", recuperado=True)
+                                    errores_encontrados.append(error)
+                                    self.txtbox_console.config(state='normal')
+                                    self.txtbox_console.insert(END, cadena_aux)
+                                    self.txtbox_console.config(state='disabled')
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 8: # conteo
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 25: # Cierra paréntesis
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 21: # Punto y coma
+                                        # Función conteo correcta
+                                        cantidad_registros = len(encabezados)*len(registros)
+                                        cantidad_registros = str(cantidad_registros) + '\n'
+                                        self.txtbox_console.config(state='normal')
+                                        self.txtbox_console.insert(END, cantidad_registros)
+                                        self.txtbox_console.config(state='disabled')
                                         self.otra_ins()
-        elif id_token == 5: # Registros
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 17: # Igual
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 18: # Abre Corchete
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 22: # Abre llave
-                                    registro_aux = []
-                                    self.valor()
-                                    id_token = tokens_leidos[index].id_token
-                                    if id_token == 23: # Cierra Llave
-                                        # Registro leído correctamente
-                                        registros.append(registro_aux)
-                                        registro_aux = []
-                                        self.mult_registros()
-                                        registro_aux = []
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 19: # Cierra Corchete
-                                            # Se leyeron todos los registros correctamente
-                                            self.otra_ins()
-        elif id_token == 6: # imprimir
-            cadena_aux = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            cadena_aux = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función imprimir correcta
-                                            self.txtbox_console.config(state='normal')
-                                            self.txtbox_console.insert(END, cadena_aux)
-                                            self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 7: # imprimirln
-            cadena_aux = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            cadena_aux = tokens_leidos[index].lexema
-                            cadena_aux += "\n"
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función imprimir correcta
-                                            self.txtbox_console.config(state='normal')
-                                            self.txtbox_console.insert(END, cadena_aux)
-                                            self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 8: # conteo
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 25: # Cierra paréntesis
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 21: # Punto y coma
-                                    # Función conteo correcta
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, no vino el token ';' que finaliza la función.", recuperado = True)
+                                    errores_encontrados.append(error)
                                     cantidad_registros = len(encabezados)*len(registros)
                                     cantidad_registros = str(cantidad_registros) + '\n'
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cantidad_registros)
                                     self.txtbox_console.config(state='disabled')
-                                    self.otra_ins()
-        elif id_token == 9: # promedio
-            campo = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función promedio correcta
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 9: # promedio
+                campo = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función promedio correcta
+                                                self.txtbox_console.config(state='normal')
+                                                pos = 0
+                                                se_encontro = False
+                                                for titulo in encabezados:
+                                                    if titulo == campo:
+                                                        se_encontro = True
+                                                        suma = 0
+                                                        filas = 0
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                suma += fila[pos]
+                                                                filas += 1
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            promedio = suma/filas
+                                                            self.txtbox_console.insert(END, str(promedio))
+                                                        else:
+                                                            self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, "\n")
+                                                        break
+                                                    pos += 1
+                                                if not se_encontro:
+                                                    self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n", 'Error')
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vino el token ';' que finaliza la función.", recuperado=True)
+                                            errores_encontrados.append(error)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -563,44 +712,77 @@ class Interfaz:
                                                         promedio = suma/filas
                                                         self.txtbox_console.insert(END, str(promedio))
                                                     else:
-                                                        self.txtbox_console.insert(END, ">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal.")
+                                                        self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
                                             if not se_encontro:
-                                                self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n")
+                                                self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 10: # contarsi
-            campo = ""
-            valor = None
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 20: # Coma
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 1 or id_token == 2 or id_token == 3: # Cadena | Entero | Decimal
-                                            valor = tokens_leidos[index].lexema
-                                            index += 1
-                                            if index < (len(tokens_leidos) - 1):
-                                                id_token = tokens_leidos[index].id_token
-                                                if id_token == 25: # Cierra paréntesis
-                                                    index += 1
-                                                    if index < (len(tokens_leidos) - 1):
-                                                        id_token = tokens_leidos[index].id_token
-                                                        if id_token == 21: # Punto y coma
-                                                            # Función contarsi correcta
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vinieron los tokens ');' que finalizan la función.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 10: # contarsi
+                campo = ""
+                valor = None
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 20: # Coma
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 1 or id_token == 2 or id_token == 3: # Cadena | Entero | Decimal
+                                                valor = tokens_leidos[index].lexema
+                                                index += 1
+                                                if index < (len(tokens_leidos) - 1):
+                                                    id_token = tokens_leidos[index].id_token
+                                                    if id_token == 25: # Cierra paréntesis
+                                                        index += 1
+                                                        if index < (len(tokens_leidos) - 1):
+                                                            id_token = tokens_leidos[index].id_token
+                                                            if id_token == 21: # Punto y coma
+                                                                # Función contarsi correcta
+                                                                self.txtbox_console.config(state='normal')
+                                                                pos = 0
+                                                                se_encontro = False
+                                                                for titulo in encabezados:
+                                                                    if titulo == campo:
+                                                                        se_encontro = True
+                                                                        contador = 0
+                                                                        for fila in registros:
+                                                                            if fila[pos] == valor:
+                                                                                contador += 1
+                                                                        self.txtbox_console.insert(END, str(contador))
+                                                                        self.txtbox_console.insert(END, "\n")
+                                                                        break
+                                                                    pos += 1
+                                                                if not se_encontro:
+                                                                    self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n", 'Error')
+                                                                self.txtbox_console.config(state='disabled')
+                                                                self.otra_ins()
+                                                        else:
+                                                            #FIN DE LECTURA DE TOKENS
+                                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, no vino el token ';' que finaliza la función.", recuperado=True)
+                                                            errores_encontrados.append(error)
                                                             self.txtbox_console.config(state='normal')
                                                             pos = 0
                                                             se_encontro = False
@@ -616,23 +798,72 @@ class Interfaz:
                                                                     break
                                                                 pos += 1
                                                             if not se_encontro:
-                                                                self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n")
+                                                                self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n", 'Error')
                                                             self.txtbox_console.config(state='disabled')
-                                                            self.otra_ins()
-        elif id_token == 11: # datos
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 25: # Cierra paréntesis
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 21: # Punto y coma
-                                    # Función datos correcta
+                                                else:
+                                                    #FIN DE LECTURA DE TOKENS
+                                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
+                                                    errores_encontrados.append(error)
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
+                                            errores_encontrados.append(error)
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 11: # datos
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 25: # Cierra paréntesis
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 21: # Punto y coma
+                                        # Función datos correcta
+                                        self.txtbox_console.config(state='normal', )
+                                        self.txtbox_console.insert(END, " ")
+                                        for titulo in encabezados:
+                                            salida = "[ " + titulo + " ]"
+                                            self.txtbox_console.insert(END, salida, "Negrita")
+                                            self.txtbox_console.insert(END, "\t")
+                                        self.txtbox_console.insert(END, "\n")
+                                        for registro in registros:
+                                            self.txtbox_console.insert(END, " ")
+                                            pos = 0
+                                            for element in registro:
+                                                len_titulo = len(encabezados[pos])
+                                                if (len_titulo - len(str(element))) > 1:
+                                                    espacios = round((len_titulo-len(str(element)))/2)
+                                                    spc = ""
+                                                    for i in range(espacios):
+                                                        spc += " " 
+                                                    salida = "[ " + spc + str(element) + spc + " ]"
+                                                else:
+                                                    salida = "[ " + str(element) + " ]"
+                                                self.txtbox_console.insert(END, salida)
+                                                self.txtbox_console.insert(END, "\t")
+                                                pos += 1
+                                            self.txtbox_console.insert(END, "\n")
+                                        self.txtbox_console.config(state='disabled')
+                                        self.otra_ins()
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, no vino el token ';' que finaliza la función.", recuperado=True)
+                                    errores_encontrados.append(error)
                                     self.txtbox_console.config(state='normal', )
                                     self.txtbox_console.insert(END, " ")
                                     for titulo in encabezados:
@@ -658,27 +889,63 @@ class Interfaz:
                                             pos += 1
                                         self.txtbox_console.insert(END, "\n")
                                     self.txtbox_console.config(state='disabled')
-                                    self.otra_ins()
-        elif id_token == 12: # sumar
-            campo = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función sumar correcta
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 12: # sumar
+                campo = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función sumar correcta
+                                                self.txtbox_console.config(state='normal')
+                                                pos = 0
+                                                se_encontro = False
+                                                for titulo in encabezados:
+                                                    if titulo == campo:
+                                                        se_encontro = True
+                                                        suma = 0
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                suma += fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            self.txtbox_console.insert(END, str(suma))
+                                                        else:
+                                                            self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, "\n")
+                                                        break
+                                                    pos += 1
+                                                if not se_encontro:
+                                                    self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n", 'Error')
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, no vino el token ';' que finaliza la función.", recuperado = True)
+                                            errores_encontrados.append(error)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -696,34 +963,80 @@ class Interfaz:
                                                     if not hay_cadenas:
                                                         self.txtbox_console.insert(END, str(suma))
                                                     else:
-                                                        self.txtbox_console.insert(END, ">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal.")
+                                                        self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
                                             if not se_encontro:
-                                                self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n")
+                                                self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 13: # max
-            campo = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función max correcta
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 13: # max
+                campo = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función max correcta
+                                                self.txtbox_console.config(state='normal')
+                                                pos = 0
+                                                se_encontro = False
+                                                for titulo in encabezados:
+                                                    if titulo == campo:
+                                                        se_encontro = True
+                                                        max_campo = None
+                                                        if len(registros)>0:
+                                                            max_campo = registros[0][pos]
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                if fila[pos] > max_campo:
+                                                                    max_campo = fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            if max_campo:
+                                                                self.txtbox_console.insert(END, str(max_campo))
+                                                            else:
+                                                                self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.", 'Error')
+                                                        else:
+                                                            self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, "\n")
+                                                        break
+                                                    pos += 1
+                                                if not se_encontro:
+                                                    self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n", 'Error')
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, no vino el token ';' que finaliza la función.", recuperado = True)
+                                            errores_encontrados.append(error)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -745,36 +1058,82 @@ class Interfaz:
                                                         if max_campo:
                                                             self.txtbox_console.insert(END, str(max_campo))
                                                         else:
-                                                            self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.")
+                                                            self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.", 'Error')
                                                     else:
-                                                        self.txtbox_console.insert(END, ">> Error en la función max. Todos los valores deben ser de tipo entero o decimal.")
+                                                        self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
                                             if not se_encontro:
-                                                self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n")
+                                                self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 14: # min
-            campo = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función min correcta
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 14: # min
+                campo = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función min correcta
+                                                self.txtbox_console.config(state='normal')
+                                                pos = 0
+                                                se_encontro = False
+                                                for titulo in encabezados:
+                                                    if titulo == campo:
+                                                        se_encontro = True
+                                                        min_campo = None
+                                                        if len(registros)>0:
+                                                            min_campo = registros[0][pos]
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                if fila[pos] < min_campo:
+                                                                    min_campo = fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            if min_campo:
+                                                                self.txtbox_console.insert(END, str(min_campo))
+                                                            else:
+                                                                self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.", 'Error')
+                                                        else:
+                                                            self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, "\n")
+                                                        break
+                                                    pos += 1
+                                                if not se_encontro:
+                                                    self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n", 'Error')
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, no vino el token ';' que finaliza la función.", recuperado = True)
+                                            errores_encontrados.append(error)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -796,46 +1155,85 @@ class Interfaz:
                                                         if min_campo:
                                                             self.txtbox_console.insert(END, str(min_campo))
                                                         else:
-                                                            self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.")
+                                                            self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.", 'Error')
                                                     else:
-                                                        self.txtbox_console.insert(END, ">> Error en la función min. Todos los valores deben ser de tipo entero o decimal.")
+                                                        self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
                                             if not se_encontro:
-                                                self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n")
+                                                self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
-        elif id_token == 15: # exportarReporte
-            campo = ""
-            index += 1
-            if index < (len(tokens_leidos) - 1):
-                id_token = tokens_leidos[index].id_token
-                if id_token == 24: # Abre paréntesis
-                    index += 1
-                    if index < (len(tokens_leidos) - 1):
-                        id_token = tokens_leidos[index].id_token
-                        if id_token == 1: # Cadena
-                            campo = tokens_leidos[index].lexema
-                            index += 1
-                            if index < (len(tokens_leidos) - 1):
-                                id_token = tokens_leidos[index].id_token
-                                if id_token == 25: # Cierra paréntesis
-                                    index += 1
-                                    if index < (len(tokens_leidos) - 1):
-                                        id_token = tokens_leidos[index].id_token
-                                        if id_token == 21: # Punto y coma
-                                            # Función exportarReporte correcta
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            elif id_token == 15: # exportarReporte
+                campo = ""
+                index += 1
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 24: # Abre paréntesis
+                        index += 1
+                        if index < (len(tokens_leidos) - 1):
+                            id_token = tokens_leidos[index].id_token
+                            if id_token == 1: # Cadena
+                                campo = tokens_leidos[index].lexema
+                                index += 1
+                                if index < (len(tokens_leidos) - 1):
+                                    id_token = tokens_leidos[index].id_token
+                                    if id_token == 25: # Cierra paréntesis
+                                        index += 1
+                                        if index < (len(tokens_leidos) - 1):
+                                            id_token = tokens_leidos[index].id_token
+                                            if id_token == 21: # Punto y coma
+                                                # Función exportarReporte correcta
+                                                self.txtbox_console.config(state='normal')
+                                                generado = self.reporte_ejecucion(campo)
+                                                if generado:
+                                                    self.txtbox_console.insert(END, ">> Reporte generado con éxito (Reportes HTML/reporte.html)\n", 'Exito')
+                                                else:
+                                                    self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n", 'Error')
+                                                self.txtbox_console.config(state='disabled')
+                                                self.otra_ins()
+                                        else:
+                                            #FIN DE LECTURA DE TOKENS
+                                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, no vino el token ';' que finaliza la función.", recuperado = True)
+                                            errores_encontrados.append(error)
                                             self.txtbox_console.config(state='normal')
                                             generado = self.reporte_ejecucion(campo)
                                             if generado:
-                                                self.txtbox_console.insert(END, ">> Reporte generado con éxito (Reportes HTML/reporte.html)\n")
+                                                self.txtbox_console.insert(END, ">> Reporte generado con éxito (Reportes HTML/reporte.html)\n", 'Exito')
                                             else:
-                                                self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n")
+                                                self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
-                                            self.otra_ins()
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
+                                    errores_encontrados.append(error)
+                        else:
+                            #FIN DE LECTURA DE TOKENS
+                            error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
+                            errores_encontrados.append(error)
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
+                    errores_encontrados.append(error)
+            else:
+                error = Error("N/A", "Sintáctico", f"Se esperaba una palabra reservada. Vino token {tokens_leidos[index].nombre}.", lexema=tokens_leidos[index].lexema)
+                errores_encontrados.append(error)
+                index += 1
+                self.inicio()
         else:
-            # TODO Error sintáctico
+            #FIN DE LECTURA DE TOKENS
             pass
 
     def cadenas(self):
@@ -843,6 +1241,7 @@ class Interfaz:
         global index
         global encabezados
         index += 1
+        finalizacion = False
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
@@ -852,11 +1251,27 @@ class Interfaz:
                     if id_token == 1: # Cadena
                         encabezados.append(tokens_leidos[index].lexema)
                         self.cadenas()
+                else:
+                    #FIN DE LECTURA DE TOKENS
+                    error = Error("N/A", "Sintáctico", "En la asignación de Claves, la sintaxis es inconclusa.", recuperado=True)
+                    errores_encontrados.append(error)
+                    finalizacion = True
+                    return finalizacion
+            else:
+                return finalizacion
+        else:
+            #FIN DE LECTURA DE TOKENS
+            error = Error("N/A", "Sintáctico", "En la asignación de Claves, no vino el token ']' que finaliza la asignación.", recuperado=True)
+            errores_encontrados.append(error)
+            finalizacion = True
+            return finalizacion
     
     def valor(self):
+        # { valor } = { 1 valores | 2 valores | 3 valores }
         global tokens_leidos
         global index
         global registro_aux
+        global flag_final
         index += 1
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
@@ -869,21 +1284,27 @@ class Interfaz:
             elif id_token == 3: # Decimal
                 registro_aux.append(tokens_leidos[index].lexema)
                 self.valores()
+        else:
+            flag_final = True
     
     def valores(self,):
         global tokens_leidos
         global index
+        global flag_final
         index += 1
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
                 self.valor()
+        else:
+            flag_final = True
 
     def mult_registros(self):
         global tokens_leidos
         global index
         global registros
         global registro_aux
+        global flag_final
         index += 1
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
@@ -895,6 +1316,8 @@ class Interfaz:
                     registros.append(registro_aux)
                     registro_aux = []
                     self.mult_registros()
+        else:
+            flag_final = True
 
     def otra_ins(self):
         global index
