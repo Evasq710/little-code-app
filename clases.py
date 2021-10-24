@@ -73,6 +73,11 @@ class Error:
         self.columna = columna
         self.lexema = lexema
         self.recuperado = recuperado
+
+        if self.fila is None:
+            self.fila = "-"
+        if self.columna is None:
+            self.columna = "-"
     
 class Pila:
     def __init__(self):

@@ -1,5 +1,7 @@
+from os import terminal_size
 from tkinter import *
 from tkinter import filedialog, messagebox
+from tkinter.font import families
 from clases import *
 import traceback
 
@@ -12,6 +14,7 @@ errores_encontrados = []
 encabezados = []
 registros = []
 registro_aux = []
+errores_registros = 0
 flag_final = False
 
 class Interfaz:
@@ -97,7 +100,7 @@ class Interfaz:
 
         row_num = 5
         for (tipo_reporte, valor) in list_reportes:
-            Radiobutton(frame_btn, text=tipo_reporte, variable=reporte, value=valor, font=("Ebrima bold", 12), bg="white").grid(row=row_num, column=1, padx=10)
+            Radiobutton(frame_btn, text=tipo_reporte, variable=reporte, value=valor, font=("Ebrima bold", 12), bg="#05323D").grid(row=row_num, column=1, padx=10)
             row_num += 1
             Label(frame_btn, text="", bg="#05323D").grid(row=row_num, column=0, pady=2)
             row_num += 1
@@ -149,7 +152,7 @@ class Interfaz:
             self.analizador_sintactico()
             print(f"ERRORES: {len(errores_encontrados)}")
             for error in errores_encontrados:
-                print(error.caracter, error.tipo, error.descripcion, str(error.fila), str(error.columna))
+                print(error.caracter, error.tipo, error.descripcion, str(error.fila), str(error.columna), error.lexema, error.recuperado)
         else:
             self.txtbox_console.config(state='normal')
             self.txtbox_console.insert(END, ">> Fin de análisis de código. No se encontraron errores léxicos ni sintácticos.\n", 'Fin')
@@ -399,10 +402,9 @@ class Interfaz:
         global encabezados
         global registros
         global flag_final
+        global errores_registros
         tokens_leidos.append("#")
         index = 0
-        encabezados = []
-        registros = []
         flag_final = False
         self.inicio()
         tokens_leidos.pop()
@@ -420,9 +422,11 @@ class Interfaz:
         global encabezados
         global registros
         global registro_aux
+        global errores_registros
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 4: # Claves
+                encabezados = []
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
@@ -436,25 +440,36 @@ class Interfaz:
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 1: # Cadena
                                         encabezados.append(tokens_leidos[index].lexema)
-                                        final = self.cadenas()
-                                        if not final:
-                                            id_token = tokens_leidos[index].id_token
-                                            if id_token == 19: # Cierra Corchete
-                                                # Se leyeron las claves correctamente
-                                                self.otra_ins()
+                                        sintax_error = self.cadenas()
+                                        if not sintax_error:
+                                            if not flag_final:
+                                                id_token = tokens_leidos[index].id_token
+                                                if id_token == 19: # Cierra Corchete
+                                                    # Se leyeron las claves correctamente
+                                                    self.otra_ins()
+                                                else:
+                                                    self.panic_mode("Claves", ingreso_datos=True)
+                                    else:
+                                        self.panic_mode("Claves", ingreso_datos=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("Claves", ingreso_datos=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("Claves", ingreso_datos=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, sin asignación de valores.")
                     errores_encontrados.append(error)
             elif id_token == 5: # Registros
+                registros = []
+                errores_registros = 0
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
@@ -468,44 +483,72 @@ class Interfaz:
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 22: # Abre llave
                                         registro_aux = []
-                                        self.valor()
-                                        if not flag_final:
-                                            id_token = tokens_leidos[index].id_token
-                                            if id_token == 23: # Cierra Llave
-                                                # Registro leído correctamente
-                                                registros.append(registro_aux)
-                                                registro_aux = []
-                                                self.mult_registros()
-                                                if not flag_final:
-                                                    registro_aux = []
-                                                    id_token = tokens_leidos[index].id_token
-                                                    if id_token == 19: # Cierra Corchete
-                                                        # Se leyeron todos los registros correctamente
-                                                        self.otra_ins()
-                                                else:
-                                                    #FIN DE LECTURA DE TOKENS
-                                                    if len(registro_aux) > 0:
-                                                        error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.", recuperado = True)
+                                        sintax_error = self.valor()
+                                        if not sintax_error:
+                                            if not flag_final:
+                                                id_token = tokens_leidos[index].id_token
+                                                if id_token == 23: # Cierra Llave
+                                                    # Registro leído correctamente
+                                                    if len(registro_aux) == len(encabezados):
+                                                        registros.append(registro_aux)
+                                                    elif len(registro_aux) < len(encabezados):
+                                                        for i in range(len(encabezados)-len(registro_aux)):
+                                                            registro_aux.append(None)
                                                         registros.append(registro_aux)
                                                     else:
-                                                        error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.")
-                                                    errores_encontrados.append(error)                                                    
-                                        else:
-                                            #FIN DE LECTURA DE TOKENS
-                                            if len(registro_aux) > 0:
-                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.", recuperado = True)
-                                                registros.append(registro_aux)
+                                                        errores_registros += 1
+                                                    registro_aux = []
+                                                    sintax_error = self.mult_registros()
+                                                    if not sintax_error:
+                                                        if not flag_final:
+                                                            registro_aux = []
+                                                            id_token = tokens_leidos[index].id_token
+                                                            if id_token == 19: # Cierra Corchete
+                                                                # Se leyeron todos los registros correctamente
+                                                                if len(encabezados) == 0:
+                                                                    self.txtbox_console.config(state='normal')
+                                                                    self.txtbox_console.insert(END, ">> Error en el ingreso de Registros. No se han ingresado claves al sistema.\n", 'Error')
+                                                                    self.txtbox_console.config(state='disabled')
+                                                                    registros = []
+                                                                elif errores_registros > 0:
+                                                                    self.txtbox_console.config(state='normal')
+                                                                    self.txtbox_console.insert(END, f">> Error en el ingreso de Registros. {errores_registros} registros poseen más valores que claves ingresadas, por lo que no se ingresaron. Claves ingresadas: {len(encabezados)}.  \n", 'Error')
+                                                                    self.txtbox_console.config(state='disabled')
+                                                                self.otra_ins()
+                                                            else:
+                                                                self.panic_mode("Registros", ingreso_datos=True)
+                                                        else:
+                                                            #FIN DE LECTURA DE TOKENS
+                                                            if len(registro_aux) > 0:
+                                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.", recuperado = True)
+                                                                registros.append(registro_aux)
+                                                            else:
+                                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.")
+                                                            errores_encontrados.append(error)
+                                                else:
+                                                    self.panic_mode("Registros", ingreso_datos=True)
                                             else:
-                                                error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.")
-                                            errores_encontrados.append(error)
+                                                #FIN DE LECTURA DE TOKENS
+                                                if len(registro_aux) > 0:
+                                                    error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.", recuperado = True)
+                                                    registros.append(registro_aux)
+                                                else:
+                                                    error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.")
+                                                errores_encontrados.append(error)
+                                    else:
+                                        self.panic_mode("Registros", ingreso_datos=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("Registros", ingreso_datos=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, con asignación de valores inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("Registros", ingreso_datos=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, sin asignación de valores.")
@@ -534,6 +577,8 @@ class Interfaz:
                                                 self.txtbox_console.insert(END, cadena_aux)
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("imprimir", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, no vino el token ';' que finaliza la función.", recuperado=True)
@@ -541,6 +586,8 @@ class Interfaz:
                                             self.txtbox_console.config(state='normal')
                                             self.txtbox_console.insert(END, cadena_aux)
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("imprimir", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, no vinieron los tokens ');' que finaliza la función.", recuperado=True)
@@ -548,10 +595,14 @@ class Interfaz:
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cadena_aux)
                                     self.txtbox_console.config(state='disabled')
+                            else:
+                                self.panic_mode("imprimir", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("imprimir", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
@@ -581,6 +632,8 @@ class Interfaz:
                                                 self.txtbox_console.insert(END, cadena_aux)
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("imprimirln", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, no vino el token ';' que finaliza la función.", recuperado=True)
@@ -588,6 +641,8 @@ class Interfaz:
                                             self.txtbox_console.config(state='normal')
                                             self.txtbox_console.insert(END, cadena_aux)
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("imprimirln", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, no vinieron los tokens ');' que finaliza la función.", recuperado=True)
@@ -595,10 +650,14 @@ class Interfaz:
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cadena_aux)
                                     self.txtbox_console.config(state='disabled')
+                            else:
+                                self.panic_mode("imprimirln", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("imprimirln", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
@@ -618,24 +677,38 @@ class Interfaz:
                                     if id_token == 21: # Punto y coma
                                         # Función conteo correcta
                                         cantidad_registros = len(encabezados)*len(registros)
-                                        cantidad_registros = str(cantidad_registros) + '\n'
+                                        elementos_nulos = 0
+                                        for registro in registros:
+                                            for elemento in registro:
+                                                if elemento is None:
+                                                    elementos_nulos += 1
+                                        total_registros = cantidad_registros - elementos_nulos
+                                        cantidad_registros = str(cantidad_registros)
                                         self.txtbox_console.config(state='normal')
-                                        self.txtbox_console.insert(END, cantidad_registros)
+                                        self.txtbox_console.insert(END, total_registros)
+                                        self.txtbox_console.insert(END, "\n")
                                         self.txtbox_console.config(state='disabled')
                                         self.otra_ins()
+                                    else:
+                                        self.panic_mode("conteo", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, no vino el token ';' que finaliza la función.", recuperado = True)
                                     errores_encontrados.append(error)
                                     cantidad_registros = len(encabezados)*len(registros)
-                                    cantidad_registros = str(cantidad_registros) + '\n'
+                                    cantidad_registros = str(cantidad_registros)
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cantidad_registros)
+                                    self.txtbox_console.insert(END, "\n")
                                     self.txtbox_console.config(state='disabled')
+                            else:
+                                self.panic_mode("conteo", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("conteo", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
@@ -688,6 +761,8 @@ class Interfaz:
                                                     self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n", 'Error')
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("promedio", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vino el token ';' que finaliza la función.", recuperado=True)
@@ -719,14 +794,20 @@ class Interfaz:
                                             if not se_encontro:
                                                 self.txtbox_console.insert(END, ">> Error en la función promedio. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("promedio", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vinieron los tokens ');' que finalizan la función.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("promedio", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("promedio", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
@@ -779,6 +860,8 @@ class Interfaz:
                                                                     self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n", 'Error')
                                                                 self.txtbox_console.config(state='disabled')
                                                                 self.otra_ins()
+                                                            else:
+                                                                self.panic_mode("contarsi", funcion=True)
                                                         else:
                                                             #FIN DE LECTURA DE TOKENS
                                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, no vino el token ';' que finaliza la función.", recuperado=True)
@@ -800,22 +883,32 @@ class Interfaz:
                                                             if not se_encontro:
                                                                 self.txtbox_console.insert(END, ">> Error en la función contarsi. No se encontró el campo: " + campo + ".\n", 'Error')
                                                             self.txtbox_console.config(state='disabled')
+                                                    else:
+                                                        self.panic_mode("contarsi", funcion=True)
                                                 else:
                                                     #FIN DE LECTURA DE TOKENS
                                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                                     errores_encontrados.append(error)
+                                            else:
+                                                self.panic_mode("contarsi", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                             errores_encontrados.append(error)
+                                    else:
+                                        self.panic_mode("contarsi", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("contarsi", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("contarsi", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
@@ -846,20 +939,32 @@ class Interfaz:
                                             pos = 0
                                             for element in registro:
                                                 len_titulo = len(encabezados[pos])
-                                                if (len_titulo - len(str(element))) > 1:
-                                                    espacios = round((len_titulo-len(str(element)))/2)
-                                                    spc = ""
-                                                    for i in range(espacios):
-                                                        spc += " " 
-                                                    salida = "[ " + spc + str(element) + spc + " ]"
+                                                if element is not None:
+                                                    if (len_titulo - len(str(element))) > 1:
+                                                        espacios = round((len_titulo-len(str(element)))/2)
+                                                        spc = ""
+                                                        for i in range(espacios):
+                                                            spc += " " 
+                                                        salida = "[ " + spc + str(element) + spc + " ]"
+                                                    else:
+                                                        salida = "[ " + str(element) + " ]"
                                                 else:
-                                                    salida = "[ " + str(element) + " ]"
+                                                    if (len_titulo - len("-")) > 1:
+                                                        espacios = round((len_titulo-len("---"))/2)
+                                                        spc = ""
+                                                        for i in range(espacios):
+                                                            spc += " " 
+                                                        salida = "[ " + spc + "---" + spc + " ]"
+                                                    else:
+                                                        salida = "[ --- ]"
                                                 self.txtbox_console.insert(END, salida)
                                                 self.txtbox_console.insert(END, "\t")
                                                 pos += 1
                                             self.txtbox_console.insert(END, "\n")
                                         self.txtbox_console.config(state='disabled')
                                         self.otra_ins()
+                                    else:
+                                        self.panic_mode("datos", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, no vino el token ';' que finaliza la función.", recuperado=True)
@@ -889,10 +994,14 @@ class Interfaz:
                                             pos += 1
                                         self.txtbox_console.insert(END, "\n")
                                     self.txtbox_console.config(state='disabled')
+                            else:
+                                self.panic_mode("datos", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("datos", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
@@ -942,6 +1051,8 @@ class Interfaz:
                                                     self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n", 'Error')
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("sumar", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, no vino el token ';' que finaliza la función.", recuperado = True)
@@ -970,14 +1081,20 @@ class Interfaz:
                                             if not se_encontro:
                                                 self.txtbox_console.insert(END, ">> Error en la función sumar. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("sumar", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("sumar", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("sumar", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
@@ -1033,6 +1150,8 @@ class Interfaz:
                                                     self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n", 'Error')
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("max", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, no vino el token ';' que finaliza la función.", recuperado = True)
@@ -1067,14 +1186,20 @@ class Interfaz:
                                             if not se_encontro:
                                                 self.txtbox_console.insert(END, ">> Error en la función max. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("max", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("max", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("max", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
@@ -1130,6 +1255,8 @@ class Interfaz:
                                                     self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n", 'Error')
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("min", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, no vino el token ';' que finaliza la función.", recuperado = True)
@@ -1164,14 +1291,20 @@ class Interfaz:
                                             if not se_encontro:
                                                 self.txtbox_console.insert(END, ">> Error en la función min. No se encontró el campo: " + campo + ".\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("min", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("min", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("min", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
@@ -1204,6 +1337,8 @@ class Interfaz:
                                                     self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n", 'Error')
                                                 self.txtbox_console.config(state='disabled')
                                                 self.otra_ins()
+                                            else:
+                                                self.panic_mode("exportarReporte", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, no vino el token ';' que finaliza la función.", recuperado = True)
@@ -1215,14 +1350,20 @@ class Interfaz:
                                             else:
                                                 self.txtbox_console.insert(END, ">> Ocurrió un error en la generación del reporte\n", 'Error')
                                             self.txtbox_console.config(state='disabled')
+                                    else:
+                                        self.panic_mode("exportarReporte", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                            else:
+                                self.panic_mode("exportarReporte", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                    else:
+                        self.panic_mode("exportarReporte", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
@@ -1240,8 +1381,9 @@ class Interfaz:
         global tokens_leidos
         global index
         global encabezados
+        global flag_final
         index += 1
-        finalizacion = False
+        flag_final = False
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
@@ -1250,21 +1392,23 @@ class Interfaz:
                     id_token = tokens_leidos[index].id_token
                     if id_token == 1: # Cadena
                         encabezados.append(tokens_leidos[index].lexema)
-                        self.cadenas()
+                        sintax_error = self.cadenas()
+                        if sintax_error is True:
+                            return sintax_error
+                    else:
+                        self.panic_mode("Claves", ingreso_datos=True)
+                        sintax_error = True
+                        return sintax_error
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "En la asignación de Claves, la sintaxis es inconclusa.", recuperado=True)
                     errores_encontrados.append(error)
-                    finalizacion = True
-                    return finalizacion
-            else:
-                return finalizacion
+                    flag_final = True
         else:
             #FIN DE LECTURA DE TOKENS
             error = Error("N/A", "Sintáctico", "En la asignación de Claves, no vino el token ']' que finaliza la asignación.", recuperado=True)
             errores_encontrados.append(error)
-            finalizacion = True
-            return finalizacion
+            flag_final = True
     
     def valor(self):
         # { valor } = { 1 valores | 2 valores | 3 valores }
@@ -1273,17 +1417,28 @@ class Interfaz:
         global registro_aux
         global flag_final
         index += 1
+        sintax_error = False
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 1: # Cadena
                 registro_aux.append(tokens_leidos[index].lexema)
-                self.valores()
+                sintax_error = self.valores()
+                if sintax_error is True:
+                    return sintax_error
             elif id_token == 2: # Entero
                 registro_aux.append(tokens_leidos[index].lexema)
-                self.valores()
+                sintax_error = self.valores()
+                if sintax_error is True:
+                    return sintax_error
             elif id_token == 3: # Decimal
                 registro_aux.append(tokens_leidos[index].lexema)
-                self.valores()
+                sintax_error = self.valores()
+                if sintax_error is True:
+                    return sintax_error
+            else:
+                self.panic_mode("Registros", ingreso_datos=True)
+                sintax_error = True
+                return sintax_error
         else:
             flag_final = True
     
@@ -1295,7 +1450,9 @@ class Interfaz:
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
-                self.valor()
+                sintax_error = self.valor()
+                if sintax_error is True:
+                    return sintax_error
         else:
             flag_final = True
 
@@ -1305,17 +1462,35 @@ class Interfaz:
         global registros
         global registro_aux
         global flag_final
+        global errores_registros
+        global encabezados
         index += 1
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 22: # Abre llave
-                self.valor()
-                id_token = tokens_leidos[index].id_token
-                if id_token == 23: # Cierra Llave
-                    # Registro leído correctamente
-                    registros.append(registro_aux)
-                    registro_aux = []
-                    self.mult_registros()
+                sintax_error = self.valor()
+                if not sintax_error:
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 23: # Cierra Llave
+                        # Registro leído correctamente
+                        if len(registro_aux) == len(encabezados):
+                            registros.append(registro_aux)
+                        elif len(registro_aux) < len(encabezados):
+                            for i in range(len(encabezados)-len(registro_aux)):
+                                registro_aux.append(None)
+                            registros.append(registro_aux)
+                        else:
+                            errores_registros += 1
+                        registro_aux = []
+                        sintax_error = self.mult_registros()
+                        if sintax_error is True:
+                            return sintax_error
+                    else:
+                        self.panic_mode("Registros", ingreso_datos=True)
+                        sintax_error = True
+                        return sintax_error
+                else:
+                    return sintax_error
         else:
             flag_final = True
 
@@ -1325,6 +1500,56 @@ class Interfaz:
         if index < (len(tokens_leidos) - 1):
             self.inicio()
     
+    def panic_mode(self, lexema_inicial, ingreso_datos = False, funcion = False, recuperado = False):
+        global tokens_leidos
+        global errores_encontrados
+        global index
+        global encabezados
+        global registros
+
+        if ingreso_datos:
+
+            if lexema_inicial == "Claves":
+                error = Error("N/A", "Sintáctico", f"En Claves, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+                if len(encabezados) != 0 and not recuperado:
+                    encabezados = []
+            else:
+                error = Error("N/A", "Sintáctico", f"En Registros, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+                if len(registros) != 0 and not recuperado:
+                    registros = []
+            errores_encontrados.append(error)
+            
+            while True:
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 19: # Cierra Corchete - Token Sincronización
+                        index += 1
+                        self.inicio()
+                        break
+                else:
+                    # FIN LECTURA DE TOKENS EN -PANIC MODE-
+                    break
+                index += 1
+
+        elif funcion:
+            
+            error = Error("N/A", "Sintáctico", f"En {lexema_inicial}, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+            errores_encontrados.append(error)
+            
+            while True:
+                if index < (len(tokens_leidos) - 1):
+                    id_token = tokens_leidos[index].id_token
+                    if id_token == 21: # Punto y coma - Token Sincronización
+                        index += 1
+                        self.inicio()
+                        break
+                else:
+                    # FIN LECTURA DE TOKENS EN -PANIC MODE-
+                    break
+                index += 1
+        else:
+            print("> ERROR Panic mode: No se mandó si el error es en ingreso_datos, o en función.")
+
     def reporte_ejecucion(self, titulo):
         global tokens_leidos
         global index
@@ -1365,7 +1590,10 @@ class Interfaz:
                 id_fila = "uno" if registro_agregado % 2 == 1 else "dos"
                 html += f'<tr id="{id_fila}">\n'
                 for element in registro:
-                    html += f'<td>{element}</td>\n'
+                    if element is not None:
+                        html += f'<td>{element}</td>\n'
+                    else:
+                        html += '<td>---</td>\n'
                 html += '</tr>\n'
         except:
             traceback.print_exc()
