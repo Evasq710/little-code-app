@@ -1,7 +1,5 @@
-from os import terminal_size
 from tkinter import *
 from tkinter import filedialog, messagebox
-from tkinter.font import families
 from clases import *
 import traceback
 
@@ -21,7 +19,7 @@ flag_final = False
 class Interfaz:
     def __init__(self, window):
         self.window = window
-        self.window.title('Bitxelart')        
+        self.window.title('Little Code - Proyecto 2')        
         self.window.state('zoomed')
 
         self.frame = Frame(self.window, bg="#05323D")
@@ -218,9 +216,6 @@ class Interfaz:
                     pass
                 elif caracter == "$":
                     print("->Fin de análisis de archivo")
-                elif self.is_ascii(caracter):
-                    error = Error(caracter, "Sintáctico", "El caracter no figura como parte de ningún patrón posible.", fila, columna+1)
-                    errores_encontrados.append(error)
                 else:
                     error = Error(caracter, "Léxico", "El caracter no figura como parte del lenguaje del programa.", fila, columna+1)
                     errores_encontrados.append(error)
@@ -371,10 +366,6 @@ class Interfaz:
                     pass
                 elif caracter == "$":
                     print("->Fin de análisis de archivo")
-                elif self.is_ascii(caracter):
-                    error = Error(caracter, "Sintáctico", "El caracter no figura como parte de ningún patrón posible.", fila, columna+1)
-                    errores_encontrados.append(error)
-                    estado = "q0"
                 else:
                     error = Error(caracter, "Léxico", "El caracter no figura como parte del lenguaje del programa.", fila, columna+1)
                     errores_encontrados.append(error)
@@ -407,6 +398,10 @@ class Interfaz:
         global errores_registros
         tokens_leidos.append("#")
         index = 0
+        errores_claves = 0
+        errores_registros = 0
+        encabezados = []
+        registros = []
         flag_final = False
         self.inicio()
         tokens_leidos.pop()
@@ -2010,8 +2005,12 @@ class Interfaz:
                         html += f'<td>{error.lexema}</td>\n'
                     else:
                         html += f'<td>{error.caracter}</td>\n'
-                    html += f'''<td>{error.descripcion}</td>
-                    <td>{error.fila}</td>
+                    html += f'<td>{error.descripcion}</td>\n'
+                    if error.recuperado:
+                        html += '<td>Recuperado</td>\n'
+                    else:
+                        html += '<td>No</td>\n'
+                    html += f'''<td>{error.fila}</td>
                     <td>{error.columna}</td>
                     </tr>'''
         except:
