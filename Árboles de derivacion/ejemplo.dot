@@ -1,0 +1,55 @@
+digraph G {
+    graph[label="Árbol de derivación"]
+    node[style="filled", fillcolor="palegreen"]
+    
+    node1[label="<INICIO>", fillcolor="cyan3"]
+    node2[label="4"]
+    node3[label="17"]
+    node4[label="18"]
+    node5[label="1"]
+    node6[label="<CADENAS>", fillcolor="coral2"]
+    node7[label="19"]
+    node8[label="<OTRA_INS>", fillcolor="coral2"]
+    node1 -> node2
+    node1 -> node3
+    node1 -> node4
+    node1 -> node5
+    node1 -> node6
+    node1 -> node7
+    node1 -> node8
+
+    nodeComa[label="20"]
+    nodeCadena[label="1"]
+    nodeNOT[label="<CADENAS>", fillcolor="coral2"]
+    node6 -> nodeComa
+    node6 -> nodeCadena
+    node6 -> nodeNOT
+
+    nodeComa2[label="20"]
+    nodeCadena2[label="1"]
+    nodeNOT2[label="<CADENAS>", fillcolor="coral2"]
+    nodeNOT -> nodeComa2
+    nodeNOT -> nodeCadena2
+    nodeNOT -> nodeNOT2
+
+    nodeEp[label="epsilon"]
+    nodeNOT2 -> nodeEp
+
+    node9[label="<INICIO>", fillcolor="coral2"]
+    node10[label="7"]
+    node11[label="24"]
+    node12[label="1"]
+    node13[label="25"]
+    node14[label="21"]
+    node15[label="<OTRA_INS>", fillcolor="coral2"]
+    node8 -> node9
+    node9 -> node10
+    node9 -> node11
+    node9 -> node12
+    node9 -> node13
+    node9 -> node14
+    node9 -> node15
+
+    nodeEp2[label="epsilon"]
+    node15 -> nodeEp2
+}

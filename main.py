@@ -59,6 +59,7 @@ class Interfaz:
 
         self.txtbox_console.tag_config('Negrita', font=("Consolas", 13, "bold"))
         self.txtbox_console.tag_config('Fin', font=("Consolas", 13, "bold"), foreground="#41AA0E")
+        self.txtbox_console.tag_config('Fin_Warning', font=("Consolas", 13, "bold"), foreground="#CD870F")
         self.txtbox_console.tag_config('Error', font=("Consolas", 13, "bold"), foreground="#C81010")
         self.txtbox_console.tag_config('Exito', font=("Consolas", 13, 'bold'), foreground='#99DCF2')
 
@@ -407,7 +408,7 @@ class Interfaz:
         tokens_leidos.pop()
         self.txtbox_console.config(state='normal')
         if len(errores_encontrados) > 0:
-            self.txtbox_console.insert(END, f"\n>> Fin de análisis de código. Se encontraron {len(errores_encontrados)} errores léxicos/sintácticos, se recomienda generar 'Reporte de Errores'.\n", 'Fin')
+            self.txtbox_console.insert(END, f"\n>> Fin de análisis de código. Se encontraron {len(errores_encontrados)} errores léxicos/sintácticos, se recomienda generar 'Reporte de Errores'.\n", 'Fin_Warning')
         else:
             self.txtbox_console.insert(END, "\n>> Fin de análisis de código. No se encontraron errores léxicos ni sintácticos.\n", 'Fin')
         self.txtbox_console.config(state='disabled')
