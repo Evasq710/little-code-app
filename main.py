@@ -15,6 +15,7 @@ encabezados = []
 registros = []
 registro_aux = []
 errores_registros = 0
+errores_claves = 0
 flag_final = False
 
 class Interfaz:
@@ -402,6 +403,7 @@ class Interfaz:
         global encabezados
         global registros
         global flag_final
+        global errores_claves
         global errores_registros
         tokens_leidos.append("#")
         index = 0
@@ -423,10 +425,13 @@ class Interfaz:
         global registros
         global registro_aux
         global errores_registros
+        global errores_claves
+
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 4: # Claves
                 encabezados = []
+                errores_claves = 0
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
@@ -446,6 +451,14 @@ class Interfaz:
                                                 id_token = tokens_leidos[index].id_token
                                                 if id_token == 19: # Cierra Corchete
                                                     # Se leyeron las claves correctamente
+                                                    for clave in encabezados:
+                                                        if clave == "":
+                                                            errores_claves += 1
+                                                    if errores_claves > 0:
+                                                        self.txtbox_console.config(state='normal')
+                                                        self.txtbox_console.insert(END, f">> Error en el ingreso de Claves. No pueden venir cadenas vacías. Cadenas vacías ingresadas: {errores_claves}.  \n", 'Error')
+                                                        self.txtbox_console.config(state='disabled')
+                                                        encabezados = []
                                                     self.otra_ins()
                                                 else:
                                                     self.panic_mode("Claves", ingreso_datos=True)
@@ -512,7 +525,7 @@ class Interfaz:
                                                                     registros = []
                                                                 elif errores_registros > 0:
                                                                     self.txtbox_console.config(state='normal')
-                                                                    self.txtbox_console.insert(END, f">> Error en el ingreso de Registros. {errores_registros} registros poseen más valores que claves ingresadas, por lo que no se ingresaron. Claves ingresadas: {len(encabezados)}.  \n", 'Error')
+                                                                    self.txtbox_console.insert(END, f">> Error en el ingreso de Registros. {errores_registros} registros poseen más valores que claves cargadas al sistema, por lo que no se ingresaron. Claves cargadas: {len(encabezados)}.  \n", 'Error')
                                                                     self.txtbox_console.config(state='disabled')
                                                                 self.otra_ins()
                                                             else:
@@ -742,19 +755,22 @@ class Interfaz:
                                                         suma = 0
                                                         filas = 0
                                                         hay_cadenas = False
-                                                        for fila in registros:
-                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                                suma += fila[pos]
-                                                                filas += 1
+                                                        if len(registros) > 0:
+                                                            for fila in registros:
+                                                                if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                    suma += fila[pos]
+                                                                    filas += 1
+                                                                else:
+                                                                    hay_cadenas = True
+                                                                    break
+                                                            if not hay_cadenas:
+                                                                promedio = suma/filas
+                                                                self.txtbox_console.insert(END, str(promedio))
                                                             else:
-                                                                hay_cadenas = True
-                                                                break
-                                                        if not hay_cadenas:
-                                                            promedio = suma/filas
-                                                            self.txtbox_console.insert(END, str(promedio))
+                                                                self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                            self.txtbox_console.insert(END, "\n")
                                                         else:
-                                                            self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
-                                                        self.txtbox_console.insert(END, "\n")
+                                                            self.txtbox_console.insert(END, ">> Error en la función promedio. No se han ingresado registros al programa.\n", 'Error')
                                                         break
                                                     pos += 1
                                                 if not se_encontro:
@@ -776,19 +792,22 @@ class Interfaz:
                                                     suma = 0
                                                     filas = 0
                                                     hay_cadenas = False
-                                                    for fila in registros:
-                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                            suma += fila[pos]
-                                                            filas += 1
+                                                    if len(registros) > 0:
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                suma += fila[pos]
+                                                                filas += 1
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            promedio = suma/filas
+                                                            self.txtbox_console.insert(END, str(promedio))
                                                         else:
-                                                            hay_cadenas = True
-                                                            break
-                                                    if not hay_cadenas:
-                                                        promedio = suma/filas
-                                                        self.txtbox_console.insert(END, str(promedio))
+                                                            self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, "\n")
                                                     else:
-                                                        self.txtbox_console.insert(END, f">> Error en la función promedio. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
-                                                    self.txtbox_console.insert(END, "\n")
+                                                        self.txtbox_console.insert(END, ">> Error en la función promedio. No se han ingresado registros al programa.\n", 'Error')
                                                     break
                                                 pos += 1
                                             if not se_encontro:
@@ -928,6 +947,52 @@ class Interfaz:
                                     if id_token == 21: # Punto y coma
                                         # Función datos correcta
                                         self.txtbox_console.config(state='normal', )
+                                        if len(encabezados)>0:
+                                            self.txtbox_console.insert(END, " ")
+                                            for titulo in encabezados:
+                                                salida = "[ " + titulo + " ]"
+                                                self.txtbox_console.insert(END, salida, "Negrita")
+                                                self.txtbox_console.insert(END, "\t")
+                                            self.txtbox_console.insert(END, "\n")
+                                            for registro in registros:
+                                                self.txtbox_console.insert(END, " ")
+                                                pos = 0
+                                                for element in registro:
+                                                    len_titulo = len(encabezados[pos])
+                                                    if element is not None:
+                                                        if (len_titulo - len(str(element))) > 1:
+                                                            espacios = round((len_titulo-len(str(element)))/2)
+                                                            spc = ""
+                                                            for i in range(espacios):
+                                                                spc += " " 
+                                                            salida = "[ " + spc + str(element) + spc + " ]"
+                                                        else:
+                                                            salida = "[ " + str(element) + " ]"
+                                                    else:
+                                                        if (len_titulo - len("-")) > 1:
+                                                            espacios = round((len_titulo-len("---"))/2)
+                                                            spc = ""
+                                                            for i in range(espacios):
+                                                                spc += " " 
+                                                            salida = "[ " + spc + "---" + spc + " ]"
+                                                        else:
+                                                            salida = "[ --- ]"
+                                                    self.txtbox_console.insert(END, salida)
+                                                    self.txtbox_console.insert(END, "\t")
+                                                    pos += 1
+                                                self.txtbox_console.insert(END, "\n")
+                                        else:
+                                            self.txtbox_console.insert(END, ">> Error en la función datos. No se han ingresado Claves ni Registros al programa.  \n", 'Error')
+                                        self.txtbox_console.config(state='disabled')
+                                        self.otra_ins()
+                                    else:
+                                        self.panic_mode("datos", funcion=True)
+                                else:
+                                    #FIN DE LECTURA DE TOKENS
+                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, no vino el token ';' que finaliza la función.", recuperado=True)
+                                    errores_encontrados.append(error)
+                                    self.txtbox_console.config(state='normal', )
+                                    if len(encabezados)>0:
                                         self.txtbox_console.insert(END, " ")
                                         for titulo in encabezados:
                                             salida = "[ " + titulo + " ]"
@@ -939,60 +1004,20 @@ class Interfaz:
                                             pos = 0
                                             for element in registro:
                                                 len_titulo = len(encabezados[pos])
-                                                if element is not None:
-                                                    if (len_titulo - len(str(element))) > 1:
-                                                        espacios = round((len_titulo-len(str(element)))/2)
-                                                        spc = ""
-                                                        for i in range(espacios):
-                                                            spc += " " 
-                                                        salida = "[ " + spc + str(element) + spc + " ]"
-                                                    else:
-                                                        salida = "[ " + str(element) + " ]"
+                                                if (len_titulo - len(str(element))) > 1:
+                                                    espacios = round((len_titulo-len(str(element)))/2)
+                                                    spc = ""
+                                                    for i in range(espacios):
+                                                        spc += " " 
+                                                    salida = "[ " + spc + str(element) + spc + " ]"
                                                 else:
-                                                    if (len_titulo - len("-")) > 1:
-                                                        espacios = round((len_titulo-len("---"))/2)
-                                                        spc = ""
-                                                        for i in range(espacios):
-                                                            spc += " " 
-                                                        salida = "[ " + spc + "---" + spc + " ]"
-                                                    else:
-                                                        salida = "[ --- ]"
+                                                    salida = "[ " + str(element) + " ]"
                                                 self.txtbox_console.insert(END, salida)
                                                 self.txtbox_console.insert(END, "\t")
                                                 pos += 1
                                             self.txtbox_console.insert(END, "\n")
-                                        self.txtbox_console.config(state='disabled')
-                                        self.otra_ins()
                                     else:
-                                        self.panic_mode("datos", funcion=True)
-                                else:
-                                    #FIN DE LECTURA DE TOKENS
-                                    error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, no vino el token ';' que finaliza la función.", recuperado=True)
-                                    errores_encontrados.append(error)
-                                    self.txtbox_console.config(state='normal', )
-                                    self.txtbox_console.insert(END, " ")
-                                    for titulo in encabezados:
-                                        salida = "[ " + titulo + " ]"
-                                        self.txtbox_console.insert(END, salida, "Negrita")
-                                        self.txtbox_console.insert(END, "\t")
-                                    self.txtbox_console.insert(END, "\n")
-                                    for registro in registros:
-                                        self.txtbox_console.insert(END, " ")
-                                        pos = 0
-                                        for element in registro:
-                                            len_titulo = len(encabezados[pos])
-                                            if (len_titulo - len(str(element))) > 1:
-                                                espacios = round((len_titulo-len(str(element)))/2)
-                                                spc = ""
-                                                for i in range(espacios):
-                                                    spc += " " 
-                                                salida = "[ " + spc + str(element) + spc + " ]"
-                                            else:
-                                                salida = "[ " + str(element) + " ]"
-                                            self.txtbox_console.insert(END, salida)
-                                            self.txtbox_console.insert(END, "\t")
-                                            pos += 1
-                                        self.txtbox_console.insert(END, "\n")
+                                        self.txtbox_console.insert(END, ">> Error en la función datos. No se han ingresado Claves ni Registros al programa.  \n", 'Error')
                                     self.txtbox_console.config(state='disabled')
                             else:
                                 self.panic_mode("datos", funcion=True)
@@ -1034,16 +1059,19 @@ class Interfaz:
                                                         se_encontro = True
                                                         suma = 0
                                                         hay_cadenas = False
-                                                        for fila in registros:
-                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                                suma += fila[pos]
+                                                        if len(registros) > 0:
+                                                            for fila in registros:
+                                                                if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                    suma += fila[pos]
+                                                                else:
+                                                                    hay_cadenas = True
+                                                                    break
+                                                            if not hay_cadenas:
+                                                                self.txtbox_console.insert(END, str(suma))
                                                             else:
-                                                                hay_cadenas = True
-                                                                break
-                                                        if not hay_cadenas:
-                                                            self.txtbox_console.insert(END, str(suma))
+                                                                self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                         else:
-                                                            self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                            self.txtbox_console.insert(END, ">> Error en la función sumar. No se han ingresado registros al programa.", 'Error')
                                                         self.txtbox_console.insert(END, "\n")
                                                         break
                                                     pos += 1
@@ -1065,16 +1093,19 @@ class Interfaz:
                                                     se_encontro = True
                                                     suma = 0
                                                     hay_cadenas = False
-                                                    for fila in registros:
-                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                            suma += fila[pos]
+                                                    if len(registros) > 0:
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                suma += fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                            self.txtbox_console.insert(END, str(suma))
                                                         else:
-                                                            hay_cadenas = True
-                                                            break
-                                                    if not hay_cadenas:
-                                                        self.txtbox_console.insert(END, str(suma))
+                                                            self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     else:
-                                                        self.txtbox_console.insert(END, f">> Error en la función sumar. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, ">> Error en la función sumar. No se han ingresado registros al programa.", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
@@ -1128,21 +1159,23 @@ class Interfaz:
                                                         max_campo = None
                                                         if len(registros)>0:
                                                             max_campo = registros[0][pos]
-                                                        hay_cadenas = False
-                                                        for fila in registros:
-                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                                if fila[pos] > max_campo:
-                                                                    max_campo = fila[pos]
-                                                            else:
-                                                                hay_cadenas = True
-                                                                break
-                                                        if not hay_cadenas:
-                                                            if max_campo:
+                                                            hay_cadenas = False
+                                                            for fila in registros:
+                                                                if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                    if max_campo is not None:
+                                                                        if fila[pos] > max_campo:
+                                                                            max_campo = fila[pos]
+                                                                    else:
+                                                                        max_campo = fila[pos]
+                                                                else:
+                                                                    hay_cadenas = True
+                                                                    break
+                                                            if not hay_cadenas:
                                                                 self.txtbox_console.insert(END, str(max_campo))
                                                             else:
-                                                                self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.", 'Error')
+                                                                self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                         else:
-                                                            self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                            self.txtbox_console.insert(END, ">> Error en la función max. No se han ingresado registros al programa.", 'Error')
                                                         self.txtbox_console.insert(END, "\n")
                                                         break
                                                     pos += 1
@@ -1165,21 +1198,23 @@ class Interfaz:
                                                     max_campo = None
                                                     if len(registros)>0:
                                                         max_campo = registros[0][pos]
-                                                    hay_cadenas = False
-                                                    for fila in registros:
-                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                            if fila[pos] > max_campo:
-                                                                max_campo = fila[pos]
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                if max_campo is not None:
+                                                                    if fila[pos] > max_campo:
+                                                                        max_campo = fila[pos]
+                                                                else:
+                                                                    max_campo = fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                           self.txtbox_console.insert(END, str(max_campo))
                                                         else:
-                                                            hay_cadenas = True
-                                                            break
-                                                    if not hay_cadenas:
-                                                        if max_campo:
-                                                            self.txtbox_console.insert(END, str(max_campo))
-                                                        else:
-                                                            self.txtbox_console.insert(END, ">> Error en la función max. No se han cargado registros al programa.", 'Error')
+                                                            self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     else:
-                                                        self.txtbox_console.insert(END, f">> Error en la función max. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, ">> Error en la función max. No se han ingresado registros al programa.", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
@@ -1233,21 +1268,23 @@ class Interfaz:
                                                         min_campo = None
                                                         if len(registros)>0:
                                                             min_campo = registros[0][pos]
-                                                        hay_cadenas = False
-                                                        for fila in registros:
-                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                                if fila[pos] < min_campo:
-                                                                    min_campo = fila[pos]
-                                                            else:
-                                                                hay_cadenas = True
-                                                                break
-                                                        if not hay_cadenas:
-                                                            if min_campo:
+                                                            hay_cadenas = False
+                                                            for fila in registros:
+                                                                if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                    if min_campo is not None:
+                                                                        if fila[pos] > min_campo:
+                                                                            min_campo = fila[pos]
+                                                                    else:
+                                                                        min_campo = fila[pos]
+                                                                else:
+                                                                    hay_cadenas = True
+                                                                    break
+                                                            if not hay_cadenas:
                                                                 self.txtbox_console.insert(END, str(min_campo))
                                                             else:
-                                                                self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.", 'Error')
+                                                                self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                         else:
-                                                            self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                            self.txtbox_console.insert(END, ">> Error en la función min. No se han ingresado registros al programa.", 'Error')
                                                         self.txtbox_console.insert(END, "\n")
                                                         break
                                                     pos += 1
@@ -1270,21 +1307,23 @@ class Interfaz:
                                                     min_campo = None
                                                     if len(registros)>0:
                                                         min_campo = registros[0][pos]
-                                                    hay_cadenas = False
-                                                    for fila in registros:
-                                                        if type(fila[pos]) is int or type(fila[pos]) is float:
-                                                            if fila[pos] < min_campo:
-                                                                min_campo = fila[pos]
+                                                        hay_cadenas = False
+                                                        for fila in registros:
+                                                            if type(fila[pos]) is int or type(fila[pos]) is float:
+                                                                if min_campo is not None:
+                                                                    if fila[pos] > min_campo:
+                                                                        min_campo = fila[pos]
+                                                                else:
+                                                                    min_campo = fila[pos]
+                                                            else:
+                                                                hay_cadenas = True
+                                                                break
+                                                        if not hay_cadenas:
+                                                                self.txtbox_console.insert(END, str(min_campo))
                                                         else:
-                                                            hay_cadenas = True
-                                                            break
-                                                    if not hay_cadenas:
-                                                        if min_campo:
-                                                            self.txtbox_console.insert(END, str(min_campo))
-                                                        else:
-                                                            self.txtbox_console.insert(END, ">> Error en la función min. No se han cargado registros al programa.", 'Error')
+                                                            self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
                                                     else:
-                                                        self.txtbox_console.insert(END, f">> Error en la función min. Todos los valores deben ser de tipo entero o decimal. Campo: {campo}", 'Error')
+                                                        self.txtbox_console.insert(END, ">> Error en la función min. No se han ingresado registros al programa.", 'Error')
                                                     self.txtbox_console.insert(END, "\n")
                                                     break
                                                 pos += 1
@@ -1369,7 +1408,7 @@ class Interfaz:
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
             else:
-                error = Error("N/A", "Sintáctico", f"Se esperaba una palabra reservada. Vino token {tokens_leidos[index].nombre}.", lexema=tokens_leidos[index].lexema)
+                error = Error("N/A", "Sintáctico", f"Se esperaba una palabra reservada. Vino token {tokens_leidos[index].nombre}.", lexema=tokens_leidos[index].lexema, fila=tokens_leidos[index].fila, columna=tokens_leidos[index].columna)
                 errores_encontrados.append(error)
                 index += 1
                 self.inicio()
@@ -1510,11 +1549,13 @@ class Interfaz:
         if ingreso_datos:
 
             if lexema_inicial == "Claves":
-                error = Error("N/A", "Sintáctico", f"En Claves, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+                error = Error("N/A", "Sintáctico", f"En Claves, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.",
+                            lexema=tokens_leidos[index].lexema, recuperado = recuperado, fila=tokens_leidos[index].fila, columna=tokens_leidos[index].columna)
                 if len(encabezados) != 0 and not recuperado:
                     encabezados = []
             else:
-                error = Error("N/A", "Sintáctico", f"En Registros, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+                error = Error("N/A", "Sintáctico", f"En Registros, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.",
+                            lexema=tokens_leidos[index].lexema, recuperado = recuperado, fila=tokens_leidos[index].fila, columna=tokens_leidos[index].columna)
                 if len(registros) != 0 and not recuperado:
                     registros = []
             errores_encontrados.append(error)
@@ -1533,7 +1574,8 @@ class Interfaz:
 
         elif funcion:
             
-            error = Error("N/A", "Sintáctico", f"En {lexema_inicial}, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.", lexema=tokens_leidos[index].lexema, recuperado = recuperado)
+            error = Error("N/A", "Sintáctico", f"En {lexema_inicial}, se encontró un token {tokens_leidos[index].nombre}, que ocasionó una sintaxis incorrecta.",
+                        lexema=tokens_leidos[index].lexema, recuperado = recuperado, fila=tokens_leidos[index].fila, columna=tokens_leidos[index].columna)
             errores_encontrados.append(error)
             
             while True:
@@ -1904,34 +1946,34 @@ class Interfaz:
         <body>
             <li style="float: left; padding-left: 25%; padding-right: 20px;"><span class="material-icons md-light md-100">error</span></li>
             <h1>Reporte de Errores</h1>
-            <div class="datos-reporte">
-                <div class="tabla-errores">
-                    <table class="table table-striped table-hover">
-                        <thead style="background-color: black; color: white;">
-                            <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Caracter</th>
-                            <th scope="col">Tipo</th>
-                            <th scope="col">Descripcion</th>
-                            <th scope="col">Fila</th>
-                            <th scope="col">Columna</th>
-                            </tr>
-                        </thead>
-                        <tbody>'''
+        <div class="datos-reporte">
+            <h2 style="color: black;">Errores Léxicos</h2>
+            <div class="tabla-errores">
+                <table class="table table-striped table-hover">
+                    <thead style="background-color: black; color: white;">
+                        <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Caracter</th>
+                        <th scope="col">Descripcion</th>
+                        <th scope="col">Fila</th>
+                        <th scope="col">Columna</th>
+                        </tr>
+                    </thead>
+                    <tbody>'''
         error_agregado = 0
         id_fila = ""
         try:
             for error in errores_encontrados:
-                error_agregado += 1
-                id_fila = "uno" if error_agregado % 2 == 1 else "dos"
-                html += f'''\n<tr id="{id_fila}">
-                <th scope="row">{error_agregado}</th>
-                <td>{error.caracter}</td>
-                <td>{error.tipo}</td>
-                <td>{error.descripcion}</td>
-                <td>{error.fila}</td>
-                <td>{error.columna}</td>
-                </tr>'''
+                if error.tipo == "Léxico":
+                    error_agregado += 1
+                    id_fila = "uno" if error_agregado % 2 == 1 else "dos"
+                    html += f'''\n<tr id="{id_fila}">
+                    <th scope="row">{error_agregado}</th>
+                    <td>{error.caracter}</td>
+                    <td>{error.descripcion}</td>
+                    <td>{error.fila}</td>
+                    <td>{error.columna}</td>
+                    </tr>'''
         except:
             traceback.print_exc()
             return False
@@ -1939,6 +1981,47 @@ class Interfaz:
                     </table>
                 </div>
             </div>
+
+        <div class="datos-reporte">
+            <h2 style="color: black;">Errores Sintácticos</h2>
+            <div class="tabla-errores">
+                <table class="table table-striped table-hover">
+                    <thead style="background-color: black; color: white;">
+                        <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Caracter/Lexema</th>
+                        <th scope="col">Descripcion</th>
+                        <th scope="col">Recuperado</th>
+                        <th scope="col">Fila</th>
+                        <th scope="col">Columna</th>
+                        </tr>
+                    </thead>
+                    <tbody>'''
+        error_agregado = 0
+        id_fila = ""
+        try:
+            for error in errores_encontrados:
+                if error.tipo == "Sintáctico":
+                    error_agregado += 1
+                    id_fila = "uno" if error_agregado % 2 == 1 else "dos"
+                    html += f'''\n<tr id="{id_fila}">
+                    <th scope="row">{error_agregado}</th>\n'''
+                    if error.lexema:
+                        html += f'<td>{error.lexema}</td>\n'
+                    else:
+                        html += f'<td>{error.caracter}</td>\n'
+                    html += f'''<td>{error.descripcion}</td>
+                    <td>{error.fila}</td>
+                    <td>{error.columna}</td>
+                    </tr>'''
+        except:
+            traceback.print_exc()
+            return False
+        html += '''\n</tbody>
+                    </table>
+                </div>
+            </div>
+
             <footer>
                 <p>Elías Abraham Vasquez Soto - 201900131</p>
                 <p>Proyecto 2 - Laboratorio Lenguajes Formales y de Programación B-</p>        
@@ -1948,6 +2031,7 @@ class Interfaz:
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
         </body>
         </html>'''
+        
         css = '''html {
             min-height: 100%;
             position: relative;
