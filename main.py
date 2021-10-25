@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import filedialog, messagebox
 from clases import *
-import traceback
+import traceback, os
 
 texto_lfp = ""
 codigo = ""
@@ -15,6 +15,12 @@ registro_aux = []
 errores_registros = 0
 errores_claves = 0
 flag_final = False
+nodo_raiz = None
+id_node_padre = None
+id_node_padre_aux_1 = None
+id_node_padre_aux_2 = None
+id_node_padre_aux_3 = None
+id_node = 0
 
 class Interfaz:
     def __init__(self, window):
@@ -397,6 +403,13 @@ class Interfaz:
         global flag_final
         global errores_claves
         global errores_registros
+        global nodo_raiz
+        global id_node
+        global id_node_padre
+        global id_node_padre_aux_1
+        global id_node_padre_aux_2
+        global id_node_padre_aux_3
+
         tokens_leidos.append("#")
         index = 0
         errores_claves = 0
@@ -404,8 +417,42 @@ class Interfaz:
         encabezados = []
         registros = []
         flag_final = False
+        
+        id_node = 0        
+        nodo_raiz = Nodo(Dato(id_node, "<INICIO>", inicio=True))
+        id_node_padre = id_node
+        id_node += 1
         self.inicio()
         tokens_leidos.pop()
+
+        nodo_raiz.imprimir_arbol()
+        str_nodos_graphviz = nodo_raiz.crear_nodos_graphviz()
+        arbol_graphviz = Arbol_Graphviz(str_nodos_graphviz)
+        digraph_creado = False
+        try:
+            ruta = 'Arboles de derivacion\\arbol derivacion.dot'
+            archivo_dot = open(ruta, 'w')
+            archivo_dot.write(arbol_graphviz.str_graphviz)
+            archivo_dot.close()
+            digraph_creado = True
+        except:
+            traceback.print_exc()
+        if digraph_creado:
+            print("> Archivo .dot creado exitosamente. Ver: Arboles de derivacion")
+            try:
+                os.chdir('Arboles de derivacion')
+                ruta_dot = "arbol derivacion.dot"
+                ruta_png = "arbol derivacion.png"
+                comando = f'dot.exe -Tpng "{ruta_dot}" -o "{ruta_png}"'
+                os.system(comando)
+                os.chdir('..')
+                print("> Archivo .png creado exitosamente. Ver: Arboles de derivacion")
+            except:
+                traceback.print_exc()
+                print("> Ocurrió un error en la creación del archivo .png :(")
+        else:
+            print("> Ocurrió un error en la creación del archivo .dot :(")
+
         self.txtbox_console.config(state='normal')
         if len(errores_encontrados) > 0:
             self.txtbox_console.insert(END, f"\n>> Fin de análisis de código. Se encontraron {len(errores_encontrados)} errores léxicos/sintácticos, se recomienda generar 'Reporte de Errores'.\n", 'Fin_Warning')
@@ -422,6 +469,10 @@ class Interfaz:
         global registro_aux
         global errores_registros
         global errores_claves
+        global nodo_raiz
+        global id_node
+        global id_node_padre
+        global id_node_padre_aux_1
 
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
@@ -429,24 +480,47 @@ class Interfaz:
                 encabezados = []
                 errores_claves = 0
                 index += 1
+
+                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                id_node += 1
+
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 17: # Igual
                         index += 1
+
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                        id_node += 1
+
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 18: # Abre Corchete
                                 index += 1
+
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                id_node += 1
+
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 1: # Cadena
                                         encabezados.append(tokens_leidos[index].lexema)
+
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                        id_node_padre_aux_1 = id_node_padre
+                                        id_node += 1
+
                                         sintax_error = self.cadenas()
                                         if not sintax_error:
                                             if not flag_final:
+
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                                                id_node += 1
+
                                                 id_token = tokens_leidos[index].id_token
                                                 if id_token == 19: # Cierra Corchete
                                                     # Se leyeron las claves correctamente
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
                                                     for clave in encabezados:
                                                         if clave == "":
                                                             errores_claves += 1
@@ -1417,16 +1491,33 @@ class Interfaz:
         global index
         global encabezados
         global flag_final
+        global nodo_raiz
+        global id_node
+        global id_node_padre_aux_1
+
         index += 1
         flag_final = False
         if index < (len(tokens_leidos) - 1):
+
+            nodo_raiz.insertar_hijo_en(Dato(id_node, "<CADENAS>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+            id_node_padre_aux_1 = id_node
+            id_node += 1
+
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
                 index += 1
+
+                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node += 1
+
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 1: # Cadena
                         encabezados.append(tokens_leidos[index].lexema)
+
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                        id_node += 1
+
                         sintax_error = self.cadenas()
                         if sintax_error is True:
                             return sintax_error
