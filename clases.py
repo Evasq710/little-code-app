@@ -88,12 +88,13 @@ class Arbol_Graphviz:
         self.str_graphviz += '}'
 
 class Dato:
-    def __init__(self, id_node, label, inicio = False, no_terminal = False, hoja_lexema = False, id_nodo_padre = None):
+    def __init__(self, id_node, label, inicio = False, no_terminal = False, hoja_lexema = False, syntax_error = False, id_nodo_padre = None):
         self.id_node = id_node
         self.label = label
         self.inicio = inicio
         self.no_terminal = no_terminal
         self.hoja_lexema = hoja_lexema
+        self.syntax_error = syntax_error
         self.id_nodo_padre = id_nodo_padre
 
 class Nodo:
@@ -136,10 +137,13 @@ class Nodo:
         if self.dato.inicio:
             self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}", fillcolor="cyan3"];\n'
         elif self.dato.no_terminal:
-            self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}", fillcolor="coral2"];\n'
+            self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}", fillcolor="sienna2"];\n'
             self.str_nodos_graphviz += f'node{self.dato.id_nodo_padre} -> node{self.dato.id_node};\n'
         elif self.dato.hoja_lexema:
             self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}", fillcolor="white", shape="underline"];\n'
+            self.str_nodos_graphviz += f'node{self.dato.id_nodo_padre} -> node{self.dato.id_node};\n'
+        elif self.dato.syntax_error:
+            self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}", fillcolor="firebrick1"];\n'
             self.str_nodos_graphviz += f'node{self.dato.id_nodo_padre} -> node{self.dato.id_node};\n'
         else:
             self.str_nodos_graphviz += f'node{self.dato.id_node}[label="{self.dato.label}"];\n'

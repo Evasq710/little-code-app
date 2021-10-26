@@ -18,9 +18,8 @@ flag_final = False
 nodo_raiz = None
 id_node_padre = None
 id_node_padre_aux_1 = None
-id_node_padre_aux_2 = None
-id_node_padre_aux_3 = None
 id_node = 0
+err_syntax = False
 
 class Interfaz:
     def __init__(self, window):
@@ -407,8 +406,7 @@ class Interfaz:
         global id_node
         global id_node_padre
         global id_node_padre_aux_1
-        global id_node_padre_aux_2
-        global id_node_padre_aux_3
+        global err_syntax
 
         tokens_leidos.append("#")
         index = 0
@@ -417,6 +415,7 @@ class Interfaz:
         encabezados = []
         registros = []
         flag_final = False
+        err_syntax = False
         
         id_node = 0        
         nodo_raiz = Nodo(Dato(id_node, "<INICIO>", inicio=True))
@@ -424,8 +423,6 @@ class Interfaz:
         id_node += 1
         self.inicio()
         tokens_leidos.pop()
-
-        nodo_raiz.imprimir_arbol()
 
         self.txtbox_console.config(state='normal')
         if len(errores_encontrados) > 0:
@@ -447,14 +444,16 @@ class Interfaz:
         global id_node
         global id_node_padre
         global id_node_padre_aux_1
+        global err_syntax
 
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 4: # Claves
-                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
-                id_node += 1
-                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                id_node += 1
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
 
                 encabezados = []
                 errores_claves = 0
@@ -463,19 +462,21 @@ class Interfaz:
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 17: # Igual
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
-                        id_node += 1
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                        id_node += 1
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
 
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 18: # Abre Corchete
-                                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
-                                id_node += 1
-                                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                                id_node += 1
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
 
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
@@ -483,26 +484,29 @@ class Interfaz:
                                     if id_token == 1: # Cadena
                                         encabezados.append(tokens_leidos[index].lexema)
 
-                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
-                                        id_node_padre_aux_1 = id_node_padre
-                                        id_node += 1
-                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                                        id_node += 1
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node_padre_aux_1 = id_node_padre
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
 
                                         sintax_error = self.cadenas()
                                         if not sintax_error:
                                             if not flag_final:
 
-                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
-                                                id_node += 1
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                                                    id_node += 1
 
                                                 id_token = tokens_leidos[index].id_token
                                                 if id_token == 19: # Cierra Corchete
                                                     # Se leyeron las claves correctamente
-                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
-                                                    id_node += 1
-                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                                                    id_node += 1
+                                                    if not err_syntax:
+                                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                        id_node += 1
+                                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                        id_node += 1
                                                     for clave in encabezados:
                                                         if clave == "":
                                                             errores_claves += 1
@@ -533,27 +537,64 @@ class Interfaz:
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, sin asignación de valores.")
                     errores_encontrados.append(error)
             elif id_token == 5: # Registros
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 registros = []
                 errores_registros = 0
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 17: # Igual
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 18: # Abre Corchete
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 22: # Abre llave
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node_padre_aux_1 = id_node_padre
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         registro_aux = []
                                         sintax_error = self.valor()
                                         if not sintax_error:
                                             if not flag_final:
+
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                                                    id_node += 1
+
                                                 id_token = tokens_leidos[index].id_token
                                                 if id_token == 23: # Cierra Llave
                                                     # Registro leído correctamente
+                                                    if not err_syntax:
+                                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                        id_node_padre_aux_1 = id_node_padre
+                                                        id_node += 1
+                                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                        id_node += 1
+
                                                     if len(registro_aux) == len(encabezados):
                                                         registros.append(registro_aux)
                                                     elif len(registro_aux) < len(encabezados):
@@ -566,10 +607,21 @@ class Interfaz:
                                                     sintax_error = self.mult_registros()
                                                     if not sintax_error:
                                                         if not flag_final:
+
+                                                            if not err_syntax:
+                                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                                                                id_node += 1
+
                                                             registro_aux = []
                                                             id_token = tokens_leidos[index].id_token
                                                             if id_token == 19: # Cierra Corchete
                                                                 # Se leyeron todos los registros correctamente
+                                                                if not err_syntax:
+                                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                                    id_node += 1
+                                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                                    id_node += 1
+                                                                
                                                                 if len(encabezados) == 0:
                                                                     self.txtbox_console.config(state='normal')
                                                                     self.txtbox_console.insert(END, ">> Error en el ingreso de Registros. No se han ingresado claves al sistema.\n", 'Error')
@@ -1476,21 +1528,26 @@ class Interfaz:
         global nodo_raiz
         global id_node
         global id_node_padre_aux_1
+        global err_syntax
+        global id_node_padre
 
         index += 1
         flag_final = False
         if index < (len(tokens_leidos) - 1):
 
-            nodo_raiz.insertar_hijo_en(Dato(id_node, "<CADENAS>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
-            id_node_padre_aux_1 = id_node
-            id_node += 1
+            if not err_syntax:
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "<CADENAS>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node_padre_aux_1 = id_node
+                id_node += 1
 
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
-                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
-                id_node += 1
-                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                id_node += 1
+
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
 
                 index += 1
                 if index < (len(tokens_leidos) - 1):
@@ -1498,17 +1555,21 @@ class Interfaz:
                     if id_token == 1: # Cadena
                         encabezados.append(tokens_leidos[index].lexema)
 
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
-                        id_node += 1
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
-                        id_node += 1
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
 
                         sintax_error = self.cadenas()
                         if sintax_error is True:
                             return sintax_error
                     else:
+                        if not err_syntax:
+                            id_node_padre = id_node_padre_aux_1
                         self.panic_mode("Claves", ingreso_datos=True)
                         sintax_error = True
+
                         return sintax_error
                 else:
                     #FIN DE LECTURA DE TOKENS
@@ -1527,40 +1588,94 @@ class Interfaz:
         global index
         global registro_aux
         global flag_final
+        global nodo_raiz
+        global id_node
+        global id_node_padre_aux_1
+        global err_syntax
+        global id_node_padre
+
         index += 1
         sintax_error = False
         if index < (len(tokens_leidos) - 1):
+
+            if not err_syntax:
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "<VALOR>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node_padre_aux_1 = id_node
+                id_node += 1
+
             id_token = tokens_leidos[index].id_token
             if id_token == 1: # Cadena
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 registro_aux.append(tokens_leidos[index].lexema)
                 sintax_error = self.valores()
                 if sintax_error is True:
                     return sintax_error
+                
             elif id_token == 2: # Entero
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+                
                 registro_aux.append(tokens_leidos[index].lexema)
                 sintax_error = self.valores()
                 if sintax_error is True:
                     return sintax_error
+                
             elif id_token == 3: # Decimal
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+                
                 registro_aux.append(tokens_leidos[index].lexema)
                 sintax_error = self.valores()
                 if sintax_error is True:
                     return sintax_error
+                
             else:
+                if not err_syntax:
+                    id_node_padre = id_node_padre_aux_1
                 self.panic_mode("Registros", ingreso_datos=True)
                 sintax_error = True
+
                 return sintax_error
         else:
             flag_final = True
     
-    def valores(self,):
+    def valores(self):
         global tokens_leidos
         global index
         global flag_final
+        global nodo_raiz
+        global id_node
+        global id_node_padre_aux_1
+        global err_syntax
+
         index += 1
         if index < (len(tokens_leidos) - 1):
+
+            if not err_syntax:
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "<VALORES>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node_padre_aux_1 = id_node
+                id_node += 1
+
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
+
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 sintax_error = self.valor()
                 if sintax_error is True:
                     return sintax_error
@@ -1575,14 +1690,47 @@ class Interfaz:
         global flag_final
         global errores_registros
         global encabezados
+        global nodo_raiz
+        global id_node
+        global id_node_padre_aux_1
+        global err_syntax
+        global id_node_padre
+
         index += 1
         if index < (len(tokens_leidos) - 1):
+
+            if not err_syntax:
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "<MULT_REGISTROS>", no_terminal=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node_padre_aux_1 = id_node
+                id_padre_mult = id_node
+                id_node += 1
+
             id_token = tokens_leidos[index].id_token
             if id_token == 22: # Abre llave
+
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 sintax_error = self.valor()
                 if not sintax_error:
+
+                    if not err_syntax:
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                        id_node_padre_aux_1 = id_padre_mult
+                        id_node += 1
+                    
                     id_token = tokens_leidos[index].id_token
                     if id_token == 23: # Cierra Llave
+
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+                        
                         # Registro leído correctamente
                         if len(registro_aux) == len(encabezados):
                             registros.append(registro_aux)
@@ -1597,8 +1745,11 @@ class Interfaz:
                         if sintax_error is True:
                             return sintax_error
                     else:
+                        if not err_syntax:
+                            id_node_padre = id_node_padre_aux_1
                         self.panic_mode("Registros", ingreso_datos=True)
                         sintax_error = True
+
                         return sintax_error
                 else:
                     return sintax_error
@@ -1610,18 +1761,21 @@ class Interfaz:
         global nodo_raiz
         global id_node
         global id_node_padre
+        global err_syntax
         
-        nodo_raiz.insertar_hijo_en(Dato(id_node, "<OTRA_INS>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
-        id_node_padre = id_node
-        id_node += 1
+        if not err_syntax:
+            nodo_raiz.insertar_hijo_en(Dato(id_node, "<OTRA_INS>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
+            id_node_padre = id_node
+            id_node += 1
         
         index += 1
         if index < (len(tokens_leidos) - 1):
-            nodo_raiz.insertar_hijo_en(Dato(id_node, "<INICIO>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
-            id_node_padre = id_node
-            id_node += 1
+            if not err_syntax:
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "<INICIO>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
+                id_node_padre = id_node
+                id_node += 1
             self.inicio()
-        else:
+        elif not err_syntax:
             nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", id_nodo_padre=id_node_padre, hoja_lexema=True), id_node_padre)
             id_node += 1
     
@@ -1631,6 +1785,14 @@ class Interfaz:
         global index
         global encabezados
         global registros
+        global err_syntax
+        global nodo_raiz
+        global id_node
+        global id_node_padre
+
+        if not err_syntax:
+            err_syntax = True
+            nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
 
         if ingreso_datos:
 
