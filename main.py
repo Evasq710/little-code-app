@@ -426,32 +426,6 @@ class Interfaz:
         tokens_leidos.pop()
 
         nodo_raiz.imprimir_arbol()
-        str_nodos_graphviz = nodo_raiz.crear_nodos_graphviz()
-        arbol_graphviz = Arbol_Graphviz(str_nodos_graphviz)
-        digraph_creado = False
-        try:
-            ruta = 'Arboles de derivacion\\arbol derivacion.dot'
-            archivo_dot = open(ruta, 'w')
-            archivo_dot.write(arbol_graphviz.str_graphviz)
-            archivo_dot.close()
-            digraph_creado = True
-        except:
-            traceback.print_exc()
-        if digraph_creado:
-            print("> Archivo .dot creado exitosamente. Ver: Arboles de derivacion")
-            try:
-                os.chdir('Arboles de derivacion')
-                ruta_dot = "arbol derivacion.dot"
-                ruta_png = "arbol derivacion.png"
-                comando = f'dot.exe -Tpng "{ruta_dot}" -o "{ruta_png}"'
-                os.system(comando)
-                os.chdir('..')
-                print("> Archivo .png creado exitosamente. Ver: Arboles de derivacion")
-            except:
-                traceback.print_exc()
-                print("> Ocurrió un error en la creación del archivo .png :(")
-        else:
-            print("> Ocurrió un error en la creación del archivo .dot :(")
 
         self.txtbox_console.config(state='normal')
         if len(errores_encontrados) > 0:
@@ -477,49 +451,57 @@ class Interfaz:
         if index < (len(tokens_leidos) - 1):
             id_token = tokens_leidos[index].id_token
             if id_token == 4: # Claves
+                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                id_node += 1
+                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                id_node += 1
+
                 encabezados = []
                 errores_claves = 0
                 index += 1
 
-                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
-                id_node += 1
-
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 17: # Igual
-                        index += 1
-
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                        id_node += 1
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                         id_node += 1
 
+                        index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 18: # Abre Corchete
-                                index += 1
-
-                                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                id_node += 1
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                                 id_node += 1
 
+                                index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 1: # Cadena
                                         encabezados.append(tokens_leidos[index].lexema)
 
-                                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
                                         id_node_padre_aux_1 = id_node_padre
+                                        id_node += 1
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                                         id_node += 1
 
                                         sintax_error = self.cadenas()
                                         if not sintax_error:
                                             if not flag_final:
 
-                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", hoja_lexema=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
                                                 id_node += 1
 
                                                 id_token = tokens_leidos[index].id_token
                                                 if id_token == 19: # Cierra Corchete
                                                     # Se leyeron las claves correctamente
-                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                                                     id_node += 1
                                                     for clave in encabezados:
                                                         if clave == "":
@@ -1505,17 +1487,20 @@ class Interfaz:
 
             id_token = tokens_leidos[index].id_token
             if id_token == 20: # Coma
-                index += 1
-
-                nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                id_node += 1
+                nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                 id_node += 1
 
+                index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 1: # Cadena
                         encabezados.append(tokens_leidos[index].lexema)
 
-                        nodo_raiz.insertar_hijo_en(Dato(id_node, id_token, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
+                        id_node += 1
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
                         id_node += 1
 
                         sintax_error = self.cadenas()
@@ -1622,9 +1607,23 @@ class Interfaz:
 
     def otra_ins(self):
         global index
+        global nodo_raiz
+        global id_node
+        global id_node_padre
+        
+        nodo_raiz.insertar_hijo_en(Dato(id_node, "<OTRA_INS>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
+        id_node_padre = id_node
+        id_node += 1
+        
         index += 1
         if index < (len(tokens_leidos) - 1):
+            nodo_raiz.insertar_hijo_en(Dato(id_node, "<INICIO>", id_nodo_padre=id_node_padre, no_terminal=True), id_node_padre)
+            id_node_padre = id_node
+            id_node += 1
             self.inicio()
+        else:
+            nodo_raiz.insertar_hijo_en(Dato(id_node, "epsilon", id_nodo_padre=id_node_padre, hoja_lexema=True), id_node_padre)
+            id_node += 1
     
     def panic_mode(self, lexema_inicial, ingreso_datos = False, funcion = False, recuperado = False):
         global tokens_leidos
@@ -1858,7 +1857,13 @@ class Interfaz:
             else:
                 messagebox.showerror("Reporte de errores", "Ocurrió un error en la generación del reporte :(")
         elif value == "3":
-            print("Reporte Arbol")
+            arbol_generado = self.arbol_derivacion()
+            if arbol_generado is None:
+                messagebox.showerror("Árbol de derivación", "Debe ejecutarse código para generar un árbol de derivación.")
+            elif arbol_generado:
+                messagebox.showinfo("Árbol de derivación", "Árbol de derivación generado exitosamente.")
+            else:
+                messagebox.showerror("Árbol de derivación", "Ocurrió un error en la generación del árbol de derivación :(")
         else:
             print("Error: VALUE de reporte no reconocido.")
     
@@ -2213,6 +2218,39 @@ class Interfaz:
         except:
             traceback.print_exc()
             return False
+
+    def arbol_derivacion(self):
+        global nodo_raiz
+
+        if nodo_raiz is not None:
+            str_nodos_graphviz = nodo_raiz.crear_nodos_graphviz()
+            arbol_graphviz = Arbol_Graphviz(str_nodos_graphviz)
+            try:
+                ruta = 'Arboles de derivacion\\arbol derivacion.dot'
+                archivo_dot = open(ruta, 'w')
+                archivo_dot.write(arbol_graphviz.str_graphviz)
+                archivo_dot.close()
+            except:
+                traceback.print_exc()
+                print("> Ocurrió un error en la creación del archivo .dot :(")
+                return False
+            print("> Archivo .dot creado exitosamente. Ver: Arboles de derivacion")
+            try:
+                os.chdir('Arboles de derivacion')
+                ruta_dot = "arbol derivacion.dot"
+                ruta_png = "arbol derivacion.png"
+                comando = f'dot.exe -Tpng "{ruta_dot}" -o "{ruta_png}"'
+                os.system(comando)
+                os.chdir('..')
+                print("> Archivo .png creado exitosamente. Ver: Arboles de derivacion")
+                return True
+            except:
+                traceback.print_exc()
+                print("> Ocurrió un error en la creación del archivo .png :(")
+                return False
+        else:
+            return None
+
 
 if __name__ == "__main__":
     ventana = Tk()
