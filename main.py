@@ -524,18 +524,27 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("Claves", ingreso_datos=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("Claves", ingreso_datos=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, sin asignación de valores.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 5: # Registros
                 if not err_syntax:
                     nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
@@ -642,6 +651,9 @@ class Interfaz:
                                                             else:
                                                                 error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens que finalizan la asignación.")
                                                             errores_encontrados.append(error)
+                                                            if not err_syntax:
+                                                                err_syntax = True
+                                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                                 else:
                                                     self.panic_mode("Registros", ingreso_datos=True)
                                             else:
@@ -652,43 +664,85 @@ class Interfaz:
                                                 else:
                                                     error = Error("N/A", "Sintáctico", "En la asignación de Registros, no vinieron los tokens '} ]' que finalizan la asignación.")
                                                 errores_encontrados.append(error)
+                                                if not err_syntax:
+                                                    err_syntax = True
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                     else:
                                         self.panic_mode("Registros", ingreso_datos=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Claves, la asignación de valores es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("Registros", ingreso_datos=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, con asignación de valores inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("Registros", ingreso_datos=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada Registros, sin asignación de valores.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 6: # imprimir
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 cadena_aux = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+                            
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+                                    
                                 cadena_aux = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+                                            
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+                                                    
                                                 # Función imprimir correcta
                                                 self.txtbox_console.config(state='normal')
                                                 self.txtbox_console.insert(END, cadena_aux)
@@ -703,6 +757,9 @@ class Interfaz:
                                             self.txtbox_console.config(state='normal')
                                             self.txtbox_console.insert(END, cadena_aux)
                                             self.txtbox_console.config(state='disabled')
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                     else:
                                         self.panic_mode("imprimir", funcion=True)
                                 else:
@@ -712,38 +769,77 @@ class Interfaz:
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cadena_aux)
                                     self.txtbox_console.config(state='disabled')
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("imprimir", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("imprimir", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimir, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 7: # imprimirln
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 cadena_aux = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 cadena_aux = tokens_leidos[index].lexema
                                 cadena_aux += "\n"
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función imprimir correcta
                                                 self.txtbox_console.config(state='normal')
                                                 self.txtbox_console.insert(END, cadena_aux)
@@ -758,6 +854,9 @@ class Interfaz:
                                             self.txtbox_console.config(state='normal')
                                             self.txtbox_console.insert(END, cadena_aux)
                                             self.txtbox_console.config(state='disabled')
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                     else:
                                         self.panic_mode("imprimirln", funcion=True)
                                 else:
@@ -767,31 +866,64 @@ class Interfaz:
                                     self.txtbox_console.config(state='normal')
                                     self.txtbox_console.insert(END, cadena_aux)
                                     self.txtbox_console.config(state='disabled')
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("imprimirln", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("imprimirln", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada imprimirln, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 8: # conteo
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 25: # Cierra paréntesis
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 21: # Punto y coma
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         # Función conteo correcta
                                         cantidad_registros = len(encabezados)*len(registros)
                                         elementos_nulos = 0
@@ -818,37 +950,76 @@ class Interfaz:
                                     self.txtbox_console.insert(END, cantidad_registros)
                                     self.txtbox_console.insert(END, "\n")
                                     self.txtbox_console.config(state='disabled')
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("conteo", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("conteo", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada conteo, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 9: # promedio
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función promedio correcta
                                                 self.txtbox_console.config(state='normal')
                                                 pos = 0
@@ -887,6 +1058,9 @@ class Interfaz:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vino el token ';' que finaliza la función.", recuperado=True)
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -923,47 +1097,98 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, no vinieron los tokens ');' que finalizan la función.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("promedio", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("promedio", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada promedio, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 10: # contarsi
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 valor = None
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 20: # Coma
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 1 or id_token == 2 or id_token == 3: # Cadena | Entero | Decimal
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 valor = tokens_leidos[index].lexema
                                                 index += 1
                                                 if index < (len(tokens_leidos) - 1):
                                                     id_token = tokens_leidos[index].id_token
                                                     if id_token == 25: # Cierra paréntesis
+                                                        if not err_syntax:
+                                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                            id_node += 1
+                                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                            id_node += 1
+
                                                         index += 1
                                                         if index < (len(tokens_leidos) - 1):
                                                             id_token = tokens_leidos[index].id_token
                                                             if id_token == 21: # Punto y coma
+                                                                if not err_syntax:
+                                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                                    id_node += 1
+                                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                                    id_node += 1
+
                                                                 # Función contarsi correcta
                                                                 self.txtbox_console.config(state='normal')
                                                                 pos = 0
@@ -989,6 +1214,9 @@ class Interfaz:
                                                             #FIN DE LECTURA DE TOKENS
                                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, no vino el token ';' que finaliza la función.", recuperado=True)
                                                             errores_encontrados.append(error)
+                                                            if not err_syntax:
+                                                                err_syntax = True
+                                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                                             self.txtbox_console.config(state='normal')
                                                             pos = 0
                                                             se_encontro = False
@@ -1012,43 +1240,82 @@ class Interfaz:
                                                     #FIN DE LECTURA DE TOKENS
                                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                                     errores_encontrados.append(error)
+                                                    if not err_syntax:
+                                                        err_syntax = True
+                                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             else:
                                                 self.panic_mode("contarsi", funcion=True)
                                         else:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                     else:
                                         self.panic_mode("contarsi", funcion=True)
                                 else:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("contarsi", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("contarsi", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada contarsi, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 11: # datos
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 25: # Cierra paréntesis
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 21: # Punto y coma
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         # Función datos correcta
                                         self.txtbox_console.config(state='normal', )
                                         if len(encabezados)>0:
@@ -1095,6 +1362,9 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, no vino el token ';' que finaliza la función.", recuperado=True)
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                     self.txtbox_console.config(state='normal', )
                                     if len(encabezados)>0:
                                         self.txtbox_console.insert(END, " ")
@@ -1129,31 +1399,67 @@ class Interfaz:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("datos", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada datos, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 12: # sumar
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función sumar correcta
                                                 self.txtbox_console.config(state='normal')
                                                 pos = 0
@@ -1189,6 +1495,9 @@ class Interfaz:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, no vino el token ';' que finaliza la función.", recuperado = True)
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -1222,37 +1531,76 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("sumar", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("sumar", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada sumar, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 13: # max
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función max correcta
                                                 self.txtbox_console.config(state='normal')
                                                 pos = 0
@@ -1293,6 +1641,9 @@ class Interfaz:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, no vino el token ';' que finaliza la función.", recuperado = True)
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -1331,37 +1682,76 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("max", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("max", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada max, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 14: # min
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función min correcta
                                                 self.txtbox_console.config(state='normal')
                                                 pos = 0
@@ -1402,6 +1792,9 @@ class Interfaz:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, no vino el token ';' que finaliza la función.", recuperado = True)
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             self.txtbox_console.config(state='normal')
                                             pos = 0
                                             se_encontro = False
@@ -1440,37 +1833,76 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("min", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("min", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada min, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             elif id_token == 15: # exportarReporte
+                if not err_syntax:
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                    id_node += 1
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                    id_node += 1
+
                 campo = ""
                 index += 1
                 if index < (len(tokens_leidos) - 1):
                     id_token = tokens_leidos[index].id_token
                     if id_token == 24: # Abre paréntesis
+                        if not err_syntax:
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                            id_node += 1
+                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                            id_node += 1
+
                         index += 1
                         if index < (len(tokens_leidos) - 1):
                             id_token = tokens_leidos[index].id_token
                             if id_token == 1: # Cadena
+                                if not err_syntax:
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                    id_node += 1
+                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                    id_node += 1
+
                                 campo = tokens_leidos[index].lexema
                                 index += 1
                                 if index < (len(tokens_leidos) - 1):
                                     id_token = tokens_leidos[index].id_token
                                     if id_token == 25: # Cierra paréntesis
+                                        if not err_syntax:
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                            id_node += 1
+                                            nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                            id_node += 1
+
                                         index += 1
                                         if index < (len(tokens_leidos) - 1):
                                             id_token = tokens_leidos[index].id_token
                                             if id_token == 21: # Punto y coma
+                                                if not err_syntax:
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].nombre, id_nodo_padre=id_node_padre), id_node_padre)
+                                                    id_node += 1
+                                                    nodo_raiz.insertar_hijo_en(Dato(id_node, tokens_leidos[index].lexema, hoja_lexema=True, id_nodo_padre=id_node-1), id_node-1)
+                                                    id_node += 1
+
                                                 # Función exportarReporte correcta
                                                 self.txtbox_console.config(state='normal')
                                                 generado = self.reporte_ejecucion(campo)
@@ -1486,6 +1918,9 @@ class Interfaz:
                                             #FIN DE LECTURA DE TOKENS
                                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, no vino el token ';' que finaliza la función.", recuperado = True)
                                             errores_encontrados.append(error)
+                                            if not err_syntax:
+                                                err_syntax = True
+                                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                                             self.txtbox_console.config(state='normal')
                                             generado = self.reporte_ejecucion(campo)
                                             if generado:
@@ -1499,21 +1934,33 @@ class Interfaz:
                                     #FIN DE LECTURA DE TOKENS
                                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                                     errores_encontrados.append(error)
+                                    if not err_syntax:
+                                        err_syntax = True
+                                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                             else:
                                 self.panic_mode("exportarReporte", funcion=True)
                         else:
                             #FIN DE LECTURA DE TOKENS
                             error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                             errores_encontrados.append(error)
+                            if not err_syntax:
+                                err_syntax = True
+                                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                     else:
                         self.panic_mode("exportarReporte", funcion=True)
                 else:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "Se encontró palabra reservada exportarReporte, la sintaxis de la función es inconclusa.")
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
             else:
                 error = Error("N/A", "Sintáctico", f"Se esperaba una palabra reservada. Vino token {tokens_leidos[index].nombre}.", lexema=tokens_leidos[index].lexema, fila=tokens_leidos[index].fila, columna=tokens_leidos[index].columna)
                 errores_encontrados.append(error)
+                if not err_syntax:
+                    err_syntax = True
+                    nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre), id_node_padre)
                 index += 1
                 self.inicio()
         else:
@@ -1575,11 +2022,17 @@ class Interfaz:
                     #FIN DE LECTURA DE TOKENS
                     error = Error("N/A", "Sintáctico", "En la asignación de Claves, la sintaxis es inconclusa.", recuperado=True)
                     errores_encontrados.append(error)
+                    if not err_syntax:
+                        err_syntax = True
+                        nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
                     flag_final = True
         else:
             #FIN DE LECTURA DE TOKENS
             error = Error("N/A", "Sintáctico", "En la asignación de Claves, no vino el token ']' que finaliza la asignación.", recuperado=True)
             errores_encontrados.append(error)
+            if not err_syntax:
+                err_syntax = True
+                nodo_raiz.insertar_hijo_en(Dato(id_node, "Syntax Error!", syntax_error=True, id_nodo_padre=id_node_padre_aux_1), id_node_padre_aux_1)
             flag_final = True
     
     def valor(self):
