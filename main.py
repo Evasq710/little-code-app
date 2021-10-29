@@ -934,7 +934,7 @@ class Interfaz:
                                         total_registros = cantidad_registros - elementos_nulos
                                         cantidad_registros = str(cantidad_registros)
                                         self.txtbox_console.config(state='normal')
-                                        self.txtbox_console.insert(END, total_registros)
+                                        self.txtbox_console.insert(END, f"Registros: {len(registros)}, Datos: {total_registros}")
                                         self.txtbox_console.insert(END, "\n")
                                         self.txtbox_console.config(state='disabled')
                                         self.otra_ins()
